@@ -1,0 +1,67 @@
+---
+tags:
+  - ReinforcementLearning
+---
+## Basics About Reinforcement Learning 
+- Agent: The learner
+- Environment: The world the agent interacts with
+	- Types:
+		- Fully observable environment: where state == observation, like chess game
+		- Fully observable environment: where state == observation, like self driving car
+- Episode vs Continuing Task:
+	- Episode: a sequence with a clear end (like one game round).
+	- Continuing: a never-ending task. (like Autonomous Traffic Light Control System)
+- State: 
+	- A description of the situation the agent finds itself in.
+	- Denoted by ($S_t$) which mean State (S) at timestamp (t)
+- Action: 
+	- A choice the agent make at a moment.
+	- Denoted by ($A_t$) which mean Action (A)  at timestamp (t) 
+- Policy: 
+	- Thing of it as a function which take state and return action. 
+	- Denoted by ($π_t$) which mean Policy ($π$) at timestamp (t)
+- Reward:
+	- Immediate feedback after one action
+	- Note: the agent does not want to maximise the Reward
+	- Denoted by ($R_t$) which mean Reward (R) at timestamp (t)
+- Return:
+	- Also know as Cumulative Reward, Denoted by ($G_t$)
+	- Actual total future reward from timestamp t onward (often discounted)
+	- Can be calculated for each time step.
+	- Agent goal is to maximise this
+	- Formula
+		- Summation form:
+			- $G_t = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}$
+		- Expanded (unrolled) form:
+			- $G_t = R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \gamma^3 R_{t+4} + \cdots$
+		- Recursive form:
+			- $G_t = R_{t+1} + \gamma G_{t+1}$
+		- here
+			- t= timestamp for which we want to calculate the Return 
+			- k= it will keep increasing
+			- $\gamma$  is discount factor
+	- What is Discount Factor:
+		- hinders the availability of the model to look too far in the future
+		- 0 ≤ $\gamma$ ≤ 1 Lower $\gamma$ → short-sighted; $\gamma$ close to 1 → long-term planning.
+		- Analogy: Do you prefer $10 now or $11 next week? γ controls that preference.
+- Exploration vs Exploitation
+	- Should the agent try new actions to learn (explore) or use its current best action to get reward (exploit)?
+	- Analogy: Trying a new route in a race (maybe faster) vs sticking to the route that already works.
+	- Tech note: Balancing these is central to RL (epsilon-greedy, UCB, etc.).
+- Value function (State-value / Action-value)
+- Finite markov decision processes
+	- A Finite Markov Decision Process is a setup where an agent makes decisions step-by-step, the future depends only on the current situation and action, and everything is finite (finite states, actions, rewards).
+	- ![[Pasted image 20260329144239.png]]
+	- Finite
+	    - Finite number of states
+	    - Finite number of actions
+	    - Finite number of rewards
+	- 
+- Model: 
+	- It simulate the environment and give prediction to the ai agent
+	- Most of the time we do not have a model
+	- ![[Pasted image 20260329123931.png]]
+	- Types of RL Problem on the basis of model availability:
+		- Model-based Reinforcement Problem: Problem where we have the model
+		- Model-based Reinforcement Problem: Problem where we did not have the model
+- 

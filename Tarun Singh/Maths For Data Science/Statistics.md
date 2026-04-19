@@ -1,0 +1,184 @@
+---
+tags:
+  - machineLearning
+  - MathsForDataScience
+---
+## Basics about Statistics
+
+- Types
+	- Descriptive = Description of data out of data 
+	- Inferential = Prediction about population out of data 
+- Population vs Sample
+	- we study the sample and make prediction about the population 
+- Measure of central tendency
+	- Mean / First moment / Centre gravity of data
+		- sum of all then divide by count
+		- Push toward where big values are = Effected by outliers largely ![[Pasted image 20260324003634.png]] 
+	- Median
+		- 50th percentile
+		- sort the value and take the middle one (if 2 value then take avg)
+		- It try to divide the data so that both end has exact 50 percentage![[Pasted image 20260324001826.png]]
+		- Less effected by outliers
+	- mode = Most frequent value
+- Measure of Dispersion
+	- It tell us about spread of data, 
+	- if number close together -> low dispersion, number far apart -> high dispersion
+	- Types
+		- Range:
+			- Formula = max-min
+		- Variance:
+			- Formula $\mathrm{Variance} = \frac{1}{m} \sum_{i=1}^{m} (x_i - \bar{x})^2$
+				- m = number of points
+				- $\bar{x}$ = mean 
+			- squared, not in the same unit of data
+		- Standard Deviation (SD):
+			- Also know as 2nd statistical moment 
+			- Formula $\sigma = \sqrt{Variance}$
+			- Same unit as the unit of data
+		- Coefficient of variation (CV)
+			- Formula $\mathrm{CV} = \frac{\sigma}{\bar{x}} \times 100\%$
+				- $\sigma$ = standard deviation  
+				- $\bar{x}$ = mean
+			- Problem:  
+				- You have two columns (e.g., Age and Experience).  
+				- You cannot directly compare their spread because they may have different scales.  
+			- Solution:  
+				- Coefficient of Variation (CV) standardizes the spread relative to the mean.  
+				- It helps determine which dataset is more consistent (values closer to the mean).
+			- Interpretation  
+				- Lower CV → data is more consistent (less relative spread)  
+				- Higher CV → data is more dispersed (more variability)
+		- Quantiles
+			- Statistical measure where we Dividing the numerical data into equal parts, so that each group has equal number of observations
+			- Types
+				- Quartiles = 4 parts (Q1 , Q2, Q3) = (25, 50, 75)
+				- Deciles = 10 parts (D1, D2, ... D9) = (10, 20, 30, .. 90)
+				- Percentiles = 100 parts (P1, P2, ... P99) = (1,2, ... 99)
+			- They are not actual values in the data
+			- Formula
+				- Percentile Position Formula
+					- $L = \frac{p}{100}(N + 1)$
+						- p = desired percentile (e.g., 90)
+						- N = total number of observations
+				- Percentile Rank Formula
+					- $\text{Percentile Rank} = \frac{X + 0.5Y}{N} \times 100$
+						- X = number of values below
+						- Y = number of values equal
+						- N = total number of observations
+				- Example
+					- ![[Pasted image 20260330014641.png]]
+			- 5 number summary
+				- Summaries the distribution/Spread of a data using 5 values (Not describe it like others)
+				- Formula $\text{Five Number Summary} = (\text{Min},\; Q_1,\; Q_2,\; Q_3,\; \text{Max})$
+					- Min → smallest value
+					- Q1 → first quartile (25th percentile)  
+					- Q2 → median (50th percentile)  
+					- Q3 → third quartile (75th percentile)  
+					- Max → largest value
+					- ![[Pasted image 20260330015953.png]]
+				- Between 25 to 75 percentile is called IQR (Inter quartile range)
+				- The five-number summary is often represented visually using a box plot ![[Pasted image 20260330020013.png]]
+				- 
+		- Mean Absolute Deviation (MAD)
+- Covariance
+	- It tells us how two variables change together.
+	- Interpretation
+		- Covariance value is +ve = +ve covariance = when X increase - Y increase
+		- Covariance value is -ve = -ve covariance = when X increase - Y decrease
+		- Covariance value is 0 = 0 covariance = when X increase or decrease - no effect on Y 
+	- Why we use Correlation instead of Covariance
+		- It does not tell us about the strength of the relationship between two variables
+- Correlation
+	- It tells us how strongly two variables change together (like covariance with magnitude)
+	- 'Correlation does not imply causation'
+	- Interpretation
+		- Value lies between -1 to 1
+		- if value is negative = that mean negative correlation
+		- if value is positive = that mean positive correlation
+		- if value is 0 = that mean no correlation
+		- more the value closer to 1 -> mean stronger + correlation
+		- more the value closer to -1 -> mean stronger - correlation
+
+## Statistical Distributions
+
+- Random Variables
+	- A Random Variable is a set of possible values from a random experiment.
+	- Types
+		- Discrete Random Variable
+		- Continuous Random Variable
+	- Example
+		- Discrete Random Variable = (0,1) for 'tossing a coin' experiment
+		- Continuous Random Variable = (0,,,7.9,,,100 ) for 'student marks' experiment
+- Probability distribution
+	- A probability distribution is a list of all of the possible outcomes of a random variable along with their corresponding probability values.
+	- Example  ![[Pasted image 20260407014551.png]]
+- Probability distributions function
+	- Function that take a value of a random variable and return the 
+		- 1 - for discrete case(PMF) - probability of that value 
+		- 2- For continuous case(PDF) - probability density at the value
+	- Types
+		- **Probability Mass function (PMF):** 
+			- A function that take value of a discrete random variable and return probability of that value
+			- Here all point probability sum =1
+			- Example 
+				- Bernoulli distribution
+				- Binomial distribution
+			- They kinda look like this 
+				- ![[Pasted image 20260407020311.png]]
+				- Here x axis = value of column and y axis = probability
+		- **Probability density function (PDF):** 
+			- A function that take value of a continuous random variable and return probability density at the value
+			- Here total area under the cover is 1 
+			- Why Probability Density and why not Probability? on y - axis
+				- Unlike the discrete random variable which has countable number of values
+				- In the continuous variable have - infinite number of values.
+				- The probability of hitting exactly one point (e.g., height = 170.000000…) is 0.
+				- Instead, we use density → a function that tells us how probability is distributed, and we get real probabilities by taking areas under the curve (integrals).
+			- They kinda look like this
+				- ![[Pasted image 20260407020540.png]]
+				- Here x axis = value of column and y axis = probability density
+				- What does this area under the cover represents?
+					- Probability of getting the value form that range
+					- For example
+						- probability of getting marks in between range 5-6 = will be tell by calculating the area under probability density(5-6). that will be the probability
+						- ![[Pasted image 20260407021003.png]]
+		- **Cumulative distribution function (CDF):** 
+			- Created from PMF or PDF. A function that takes a value of a random variable and returns the probability that the variable is less than or equal to that value.
+			- Formula => F(X) = P(X <= x)
+			- Example
+				- CDF of PMF
+					- rolling a dice and cdf of 4 
+					- F(4) = p(4)+p(3)+p(2)+p(1)
+					- ![[Pasted image 20260407021921.png]]
+					- ![[Pasted image 20260407021956.png]]
+				- CDF of PDF
+					- similarly as above
+		- **Note** 
+			- If you integrate Probability density function (PDF) it will give you Cumulative Distribution Function(CDF)
+			- If you differentiate Cumulative Distribution Function(CDF) it will give you Probability density function (PDF)
+- Normal Distribution or Bell Curve 
+	- It is a continuous probability distribution (it is a pdf) that is symmetrical around the mean, with a bell-shaped curve.
+	- Many natural phenomena follow a normal distribution
+	- ![[Pasted image 20260407023137.png]]
+	- Properties of Normal Distribution
+		- Symmetric  ![[Pasted image 20260407023334.png]]
+		- mean == median == mode , For a proper Normal distribution ![[Pasted image 20260407023418.png]]
+		- Empirical Rule ![[Pasted image 20260407023457.png]]
+		- 4. The area under the curve = 1 -> as it is a pdf(probability distribution function)
+- Standard Normal Distribution (Z)
+	- A Standard Normal Variate(Z) is a standardised form of the normal distribution with mean = 0 and standard deviation = 1.
+	- ![[Pasted image 20260407023858.png]]
+- Skewness
+	-  Skewness is a measure of the asymmetry of a probability distribution.
+	- Also know as 3rd statistical moment
+	- it can be +ve/Right , -ve/Left or 0 skew 
+- Kurtosis
+	- Also know as 4th statistical moment
+	- Measure the tailedness of the probability distribution 
+	- Types
+		- Leptokurtic
+			- Fat tail
+			- Indicate -> more extreme values
+			- 
+		- Platykurtic
+		- Mesokurtic
