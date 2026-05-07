@@ -68,4 +68,17 @@ a= np.array( [ [[1,2,3],[4,5,6]] , [[7,8,9],[10,11,12]] ] )
 	- Ordinal Categorical Data: rating(5/4/3/2/1), grade(A/B/C/D)
 ## Curse Of Dimensionality
 There are only certain number of dimensions (features/columns) which can give you best resulting model, further increase in dimensions will result in inaccuracy in model
-
+## Bias Variance Trade off
+- Bias
+	- model is too simple to capture real patterns
+	- Leads to underfitting
+	- High error in both train and test data
+- Variance
+	- how much the model’s predictions change with different training data
+	- Leads to overfitting
+	- Low train error but high test error
+- In a model we can either have (low bias and high variance) or have (high bias and low variance) -> we tried to achieve a model with low-bias and low-variance
+- Ways to get low-bias and low-variance model
+	- Regularization = Reduce variance
+	- Bagging = Reduce variance
+	- Boosting = Reduces bias (primarily), can also affect variance

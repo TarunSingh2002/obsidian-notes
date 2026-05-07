@@ -14,7 +14,7 @@ tags:
 | Cheat sheet                | [[CheatSheet of Machine Learning]] |
 | Hyper Parameter Tunning    | [[HyperParamterTunning]]           |
 | Algo/Linear Regression     | [[Linear Regression]]              |
-|                            |                                    |
+| Algo/Gradient Decent       | [[Gradient Decent]]                |
 
 
 #machineLearning 
