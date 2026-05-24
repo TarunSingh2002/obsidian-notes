@@ -328,9 +328,64 @@ model = LogisticRegression(class_weight={0:5,1:1})
 ```
 ### Normal Distribution - QQ Plot
 
-### Matrics
+## Matrics
 
-### Questions?
+## Hyper Parameter Tunning
+[[HyperParamterTunning]]
+
+## Algos
+
+### Linear Regression
+```python
+from sklearn.linear_model import LinearRegression
+lr = LinearRegression()
+lr.fit(X_train,y_train)
+y_pred=lr.predict(X_test)
+
+from sklearn.preprocessing import PolynomialFeatures
+poly = PolynomialFeatures(degree=2,include_bias=True) # degree polynomial regression + bias
+X_train_trans = poly.fit_transform(X_train) 
+X_test_trans = poly.transform(X_test)
+# then apply LR
+
+from sklearn.linear_model import Ridge, Lasso, ElasticNet
+ridge=Ridge(alpha=2) # alpha = Regularization strength # used when all column imp
+lasso=Lasso(alpha=2) # used when all column are not imp
+elasticNet=ElasticNet(alpha=2, l1_ratio=0.1) # mixing parameter for l1,l2 # used when we dont know all column are imp or not
+```
+### Logistic Regression
+- **l1_ratio:** 0 for l2 regularization, 1 for l1, and 0 to 1 for elasticnet
+- **C:** it is (1/λ) , λ-> studied in regularization, smaller values = stronger Regularization
+- **fit_intercept:** True/False , bias term add or not
+- **class_weight:** dict/none/'balanced', default value = none
+	- dict : {class_label1: weight, class_label2: weight}
+	- The “balanced” mode uses the values of y to automatically adjust weights inversely proportional to class frequencies in the input data
+- **random_state** 
+- **solver:** {‘lbfgs’, ‘liblinear’, ‘newton-cg’, ‘newton-cholesky’, ‘sag’, ‘saga’}, default=’lbfgs’
+- **max_iter**int, default=100, Maximum number of times gradient decent/solver run
+```python
+from sklearn.linear_model import LogisticRegression
+l= LogisticRegression(multi_class='multinomial') # for multi class
+
+# polynomial 
+from sklearn.preprocessing import PolynomialFeatures
+poly = PolynomialFeatures(degree=2,include_bias=True) X_trf = poly.fit_transform(X)
+```
+
+### Decision Tree
+- **max_depth:** int, default=None , The maximum depth of the tree, cause over-fitting if very high or under-fitting if very low
+- **criterion:** {“gini”, “entropy”, “log_loss”}, default=”gini”,  + {“squared_error”, “friedman_mse”, “absolute_error”, “poisson”}, default=”squared_error” The function to measure the quality of a split
+- **splitter:** {“best”, “random”}, default=”best”, The strategy used to choose the split at each node
+- **min_samples_split:** int or float, default=2, The minimum number of samples required to split an internal node
+- **min_samples_leaf:** int or float, default=1, The minimum number of samples required to be at a leaf node
+- **max_features:** int, float or {“sqrt”, “log2”}, default=None, The number of features to consider when looking for the best split
+- **random state**
+- **max_leaf_nodes:** int, default=None
+- **min_impurity_decrease:** float, default=0.0, A node will be split if this split induces a decrease of the impurity greater than or equal to this value.
+```Python
+from sklearn.tree import DecisionTreeRegressor, DecisonTreeClassifier
+```
+## Questions?
 - how to find a column following a normal distribution or some other distribution ? - for normal 'qq plot'?
 - Changing the numerical column distribution to normal -> helpful in which kind of algos
 - what is mcar, mar, mnar
@@ -340,3 +395,4 @@ model = LogisticRegression(class_weight={0:5,1:1})
 - Multivritae imputer will get applied to all column missing value right we cant apply then on one column right? and how this iterative imputer work in short ok -> and ist imp parameter also most imp paramter to know.
 - Th complete outlier deteiction and handling part -> i ahve a lot questions like what if i do not have any indepth knowlege of the column and i know it is not nomally distributed then only one way -> interQunatile proximity based approach left right? -> now -> but for all the column is it correct to just remove the extreme value on the basis of this?? -> and also the traetmnt of those value need pandas code which will never fit in the pipeline of the sklearn right? is the correct way of handling the outliers? (like not having them in pipeline)
 - How to knwo when to convert a numerical column to categorical column ? when they have lot of extremen values?? like no range?
+- How can we implement multi stage stacking with sklearn 

@@ -58,6 +58,7 @@ r2_score_adju = 1 - ((1-r2)*(40-1)/(40-1-1))
 	- Precision 
 	- Recall
 	- Roc-Auc Curev
+- Need to maximise Precision , Recall, F1 Score, Accuracy
 - Accuracy:
 	- Div = Misleading for imbalance dataset + does not tell the type of error
 	- $\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN} =  \frac{Number-of-correct-prediction}{Number-of-total-prediction}$
@@ -94,7 +95,7 @@ r2_score_adju = 1 - ((1-r2)*(40-1)/(40-1-1))
 		- macro recall
 		- weighted recall
 - AUC ROC Curve
-	- 
+	- true positive rate
 
 ```Python 
 #binary class classification
