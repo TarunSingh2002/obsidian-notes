@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "189d91dfd66dc7a2",
+        "id": "016778abdea76474",
         "type": "tabs",
         "children": [
           {
-            "id": "c2feba71b1394b43",
+            "id": "0809d4cab2a14e3d",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Machine Learning/Matrics.md",
+                "file": "Reinforcement Learning/Exploration vs Exploitation.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Matrics"
+              "title": "Exploration vs Exploitation"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "tag:#MLOps",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 324.5
+    "width": 324.5,
+    "collapsed": true
   },
   "right": {
     "id": "eeaa25e87f210d6a",
@@ -183,17 +184,31 @@
       "bases:Create new base": false
     }
   },
-  "active": "c2feba71b1394b43",
+  "active": "0809d4cab2a14e3d",
   "lastOpenFiles": [
-    "Machine Learning/HyperParamterTunning.md",
-    "Machine Learning/Matrics.md",
+    "Reinforcement Learning/Reinforcement-Learning-Basics.md",
+    "Reinforcement Learning/Exploration vs Exploitation.md",
+    "Reinforcement Learning/Multi-Armed Bandit.md",
+    "2026-05-12.md",
     "Machine Learning/CheatSheet of Machine Learning.md",
+    "MLOps/DVC.md",
+    "Python/Logger.md",
+    "Python",
+    "Maths For Data Science/Statistics.md",
+    "MLOps/MLFlow.md",
+    "MLOps",
+    "MLFlow",
+    "Maths For Data Science/Expected.md",
+    "Maths For Data Science/Probability.md",
+    "Attachments/Pasted image 20260510125106.png",
+    "Navigation/Reinforcement-Learning-Navigation.md",
+    "Machine Learning/Matrics.md",
+    "Machine Learning/HyperParamterTunning.md",
     "Machine Learning/Basics of Machine Learning.md",
     "Attachments/Pasted image 20260420004451.png",
     "Attachments/Pasted image 20260420004428.png",
     "Attachments/Pasted image 20260420004402.png",
     "Navigation/Machine-Learning-Navigation.md",
-    "Navigation/Reinforcement-Learning-Navigation.md",
     "Machine Learning/Feature Engineering.md",
     "Attachments/Pasted image 20260419225256.png",
     "Attachments/Pasted image 20260419224500.png",
@@ -201,13 +216,9 @@
     "Attachments/Pasted image 20260419214440.png",
     "Attachments/Pasted image 20260414011128.png",
     "Attachments/Pasted image 20260414010950.png",
-    "Attachments/Pasted image 20260414010120.png",
     "Machine Learning/Algos/Linear Regression.md",
-    "Maths For Data Science/Statistics.md",
     "Machine Learning/Algos",
-    "Maths For Data Science/Probability.md",
     "Machine Learning",
-    "Reinforcement Learning/Reinforcement-Learning-Basics.md",
     "Reinforcement Learning",
     "Untitled.canvas",
     "Untitled.base",

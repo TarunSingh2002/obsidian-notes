@@ -1,0 +1,6 @@
+- Expected value of something X is written as
+	- $\mathbb{E}[X] = \sum_{\text{all outcomes}} x \cdot P(X = x)$ 
+- Example: 
+	- A coin flip pays you: Heads = ₹10, Tails = ₹0.
+	- $\mathbb{E}[money] = 10 \times P(Head) + 0 \times P(Tail)$ = 10 * 0.5+0 * 0.5 = 5
+	- If you flipped 1000 times and averaged the money, you'd get close to ₹5
