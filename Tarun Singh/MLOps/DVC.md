@@ -22,6 +22,7 @@ pip install dvc[gdrive]
 #Starting
 git init
 dvc init
+dvc remote add -d myremote <fooldername/path>
 dvc remote add -d myremote gdrive://<folder-id> # set up remote
 git commit -m "init dvc" # DVC creates a .dvc/ folder (like .git/)
 
@@ -65,12 +66,12 @@ stages:
   prepare:
     cmd: python prepare.py
     deps:                  # 👀 DVC WATCHES these (if changed → re-run stage)
-      - data/raw.csv
-      - src/prepare.py
+      - data/raw.csv        # previos file output [note - not previos file] 
+      - src/prepare.py      # this file is it self depended on it self
     outs:                        # 📦 DVC TRACKS 
       - data/prepared.csv
     params:                      # ⚙️ DVC reads these from params.yaml
-      - split_ratio
+      - data_ingestion.test_size
     metrics:                     # 📊 DVC TRACKS
       - metrics/scores.json 
         
@@ -100,13 +101,23 @@ dvc push
 
 # All the 
 dvc dag # visualize pipeline graph
+
+# how to load params value
+import yaml
+def load_yaml(yaml_path:Path) -> dict:
+	with open(yaml_path, 'r') as file:
+		params = yaml.safe_lod(file)
+	return params
+""" 
+params['data_ingestion']['test_size'] # 0.20
+"""
 ```
 
 
 ---
 ## Experiment Tracking
 
-- Code changes for experiment tracking
+- Code changes for experiment tracking in emodel_evaluation.py file (where model matrices come)
 
 ```Python 
 from dvclive import Live
@@ -126,7 +137,7 @@ with Live(save_dvc_exp=True) as live:
 ```Python 
 # DVC Pipeline Flow
 dvc init
-dvc exp run 
+dvc exp run  # instead of dvc repro
 git add -A
 git commit -m ""
 git push origin <branch-name>

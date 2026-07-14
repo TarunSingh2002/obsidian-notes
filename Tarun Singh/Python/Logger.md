@@ -58,3 +58,76 @@ logger.critical("system dying")
 logger.exception("error with traceback")  # inside except block
 ```
 
+
+# Logger production set up
+
+```Python
+
+import logging.config
+from core.config import base_settings
+  
+LOG_DIR = base_settings.BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
+LOGGING_CONFIG = {
+
+    "version": 1,
+
+    "disable_existing_loggers": False,
+
+    "formatters": {
+
+        "default": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
+
+    },
+
+    "handlers": {
+
+        # "console": {
+
+        #     "class": "logging.StreamHandler",
+
+        #     "formatter": "default",
+
+        #     "level": "INFO"
+
+        # },
+
+        "file": {
+
+            "class": "logging.handlers.RotatingFileHandler",
+
+            "filename": str(LOG_DIR / "app.log"),
+
+            "maxBytes": 8 * 1024 * 1024,
+
+            "backupCount": 5,
+
+            "formatter": "default",
+
+            "level": "DEBUG",
+
+        },
+
+    },
+
+    "root": {"level": "DEBUG", "handlers": ["console", "file"]},
+
+}
+
+  
+
+def setup_logging():
+	"""
+	# main.py — called once, at the very start
+	from core.logger import setup_logging
+	setup_logging() 
+	"""
+    logging.config.dictConfig(LOGGING_CONFIG)
+
+"""
+import logging
+logger = logging.getLogger(__name__)
+logger.info("hello")
+"""
+```

@@ -6,14 +6,8 @@ tags:
 ---
 
 # The ML Project Decision Guide (Regression & Classification)
-
-> The goal of this doc is NOT to teach you new tools. You already have the tools (your cheat sheet proves it). The goal is to give you a **fixed order of operations** and a **decision rule for every fork in the road**, so that on every new Kaggle dataset you stop asking "what do I do now?" and instead run a checklist.
->
-> One library for all visuals: **seaborn** (with `matplotlib.pyplot` for layout). Pick concrete defaults. Move fast.
-
 ---
-
-## PART 0 — The 30,000-foot view (memorize this)
+## PART 0
 
 Every supervised project is the same 7 phases, always in this order:
 
@@ -26,15 +20,7 @@ Every supervised project is the same 7 phases, always in this order:
 6. MODEL      → dumb baseline → linear → tree/ensemble. Compare with CV.
 7. TUNE       → Optuna on the best 1–2 models. Final eval on test ONCE.
 ```
-
-The single most important rule, the one that fixes 80% of beginner anxiety:
-
-> **Split before you explore or clean. Fit every transformer on `X_train` only, then `.transform()` the test set.** Otherwise you leak information from the test set and your scores are a lie.
-
-This also answers a hidden question you had: "what order — null fill or outliers first?" The order is fixed (Part 5). You don't decide it per project; you follow it.
-
 ---
-
 ## PART 1 — FRAME the problem (5 minutes, no code)
 
 Answer these before touching pandas:
@@ -51,7 +37,6 @@ Concrete metric defaults (don't overthink it):
 | Balanced classification | **accuracy** + look at confusion matrix | — |
 | Imbalanced classification | **F1** or **ROC-AUC**, never accuracy | Use **recall** if missing a positive is costly (fraud, disease); **precision** if false alarms are costly |
 
-Write the answer down. Everything you do later is "does this improve my chosen metric on cross-validation?"
 
 ---
 
@@ -66,34 +51,17 @@ import matplotlib.pyplot as plt
 sns.set_theme(style="whitegrid")   # one consistent look for every project
 
 df = pd.read_csv("data.csv")
-
 df.shape                 # how many rows/cols — sets expectations
 df.head()                # eyeball actual values
 df.info()                # dtypes + non-null counts (missing data hint #1)
-df.describe().T          # numeric summary: min/max/mean/std — spot weird ranges
-df.describe(include='object').T   # categorical summary: unique counts, top value
-df.isnull().mean().mul(100).sort_values(ascending=False)   # % missing per column
+df.isnull().mean().mul(100).sort_values(ascending=False)
+df.duplicated().sum()
 ```
 
 What you are looking for here (just noting it, not fixing):
-- Columns that are secretly the wrong dtype (a number stored as object, a date stored as object).
 - Columns with huge missing %.
-- ID-like columns (unique per row) → drop them, they have no predictive value.
-- The **target's** shape (next).
-
-**Look at the target immediately:**
-
-```python
-# Regression target
-sns.histplot(df['target'], kde=True)
-plt.show()
-df['target'].skew()       # > 1 or < -1 means strongly skewed → consider log later
-
-# Classification target
-df['target'].value_counts(normalize=True)   # class balance → imbalance check
-sns.countplot(x='target', data=df)
-plt.show()
-```
+- Duplicated rows
+- Shape
 
 ---
 
@@ -112,136 +80,9 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y if classification else None   # stratify keeps class ratio in both splits
 )
 ```
-
-From here on, **you only look at `X_train` / `y_train`** when deciding what to do. The test set does not exist until the very end.
-
-> You *can* explore the full `df` for pure curiosity, but every **decision** (the median to impute, the outlier cap, the scaler's mean) must be computed from train only — which is exactly why sklearn transformers have `.fit()` (learn from train) and `.transform()` (apply to both). This is the whole reason we use the Pipeline in your cheat sheet.
-
 ---
 
 ## PART 4 — EDA: the systematic three-pass method
-
-This is the part you said scares you. Here's the fix: EDA is **always three passes, in this order.** You don't improvise.
-
-### Pass 1 — Univariate (one column at a time): "What is this column?"
-
-Split your columns into two lists first:
-
-```python
-num_cols = X_train.select_dtypes(include=np.number).columns.tolist()
-cat_cols = X_train.select_dtypes(include='object').columns.tolist()
-```
-
-**For each numeric column**, run the same 4 things:
-
-```python
-col = 'age'
-print(X_train[col].describe())
-print("skew:", X_train[col].skew(), " kurtosis:", X_train[col].kurt())
-
-fig, ax = plt.subplots(1, 2, figsize=(10,4))
-sns.histplot(X_train[col], kde=True, ax=ax[0])   # shape of distribution
-sns.boxplot(x=X_train[col], ax=ax[1])            # outliers at a glance
-plt.show()
-```
-
-**For each categorical column:**
-
-```python
-col = 'city'
-print(X_train[col].value_counts())
-print("cardinality:", X_train[col].nunique())     # how many categories
-sns.countplot(y=col, data=X_train,
-              order=X_train[col].value_counts().index)
-plt.show()
-```
-
-**Reading the statistics (your direct question — what do these numbers mean):**
-
-- **Mean vs Median:** if mean ≫ median, the column is right-skewed (a few big values pulling the average up). If they're close, it's roughly symmetric.
-- **Skewness** (`.skew()`):
-  - ≈ 0 → symmetric (good for linear models).
-  - **> +1 → right/positive skew** (long tail to the right; e.g. income, prices). Candidate for **log transform**.
-  - **< −1 → left/negative skew** (long tail to the left). Candidate for **square** transform.
-  - Between −1 and +1 → fine, leave it.
-- **Kurtosis** (`.kurt()`, this is *excess* kurtosis in pandas):
-  - ≈ 0 → tails like a normal curve.
-  - **> 0 → heavy tails / sharp peak** → expect more outliers than normal.
-  - **< 0 → light tails / flat** → fewer extreme values.
-  - Practical use: high kurtosis = pay extra attention to outlier handling for this column.
-- **Standard deviation:** spread. A column whose std is near 0 is almost constant → it carries no information → drop candidate.
-
-**"How do I know if a column is normally distributed?"** Three signals, in increasing rigor:
-1. The histogram looks like a bell.
-2. `skew` near 0 **and** `kurt` near 0.
-3. The **QQ plot** is a straight diagonal line:
-
-```python
-import scipy.stats as stats
-stats.probplot(X_train[col], dist="norm", plot=plt)
-plt.show()
-# Points hug the 45° line → normal. Points curl off at the ends → skewed/heavy tails.
-```
-
-You generally **don't need a formal normality test (Shapiro, etc.)** for ML — normality is not required by tree models at all, and linear models care about residual normality, not feature normality. Use the QQ plot as a visual gut-check and move on. (This answers your "do I need p-tests / t-tests" question: **for predictive ML, almost never.** Hypothesis tests belong to inferential statistics / A-B testing, not to building a Kaggle predictor. The one place a test sneaks in is feature selection — e.g. chi-square or ANOVA F-test via `SelectKBest` — and even there it's optional.)
-
-### Pass 2 — Bivariate (each feature vs the TARGET): "Does this column help predict y?"
-
-This is the highest-value pass. It tells you which features matter and hints at which model family will win.
-
-**Numeric feature vs target:**
-
-```python
-# Regression target → scatter
-sns.scatterplot(x='feature', y='target', data=pd.concat([X_train, y_train], axis=1))
-plt.show()
-
-# Classification target → compare distributions per class
-df_tr = pd.concat([X_train, y_train], axis=1)
-sns.boxplot(x='target', y='feature', data=df_tr)      # or sns.kdeplot with hue
-plt.show()
-```
-
-**Categorical feature vs target:**
-
-```python
-# Regression target → mean of y per category
-sns.barplot(x='cat_feature', y='target', data=df_tr)
-plt.show()
-
-# Classification target → stacked proportion
-pd.crosstab(df_tr['cat_feature'], df_tr['target'], normalize='index').plot(kind='bar', stacked=True)
-plt.show()
-```
-
-**What you're learning here — and this answers your big question "how do I decide linear vs tree?":**
-
-- In the **scatter (numeric vs regression target)**: do the points fall roughly along a **straight line**? → linear models (LinearRegression / Ridge / Lasso) will do well. Is it a **curve, plateau, or step**? → tree-based models (DecisionTree → RandomForest → GradientBoosting/XGBoost) will do better because they capture non-linearity automatically.
-- If a **boxplot of feature-per-class** shows the boxes clearly separated → that feature is a strong predictor.
-- If relationships look like clean lines/planes → **linear**. If they look like thresholds ("price jumps after 2000 sqft"), interactions, or anything non-monotonic → **trees**.
-
-You don't have to *guess* in the end — you'll test both families in Part 6. EDA just tells you what to *expect* so you're not flying blind.
-
-### Pass 3 — Multivariate (columns vs each other): "Are features redundant? Any structure?"
-
-```python
-# Correlation heatmap (numeric columns)
-corr = X_train[num_cols].corr()
-plt.figure(figsize=(10,8))
-sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm", center=0)
-plt.show()
-```
-
-**Reading correlation:**
-- Value runs −1 to +1. Near **+1** = move together, near **−1** = move oppositely, near **0** = no *linear* relationship (there could still be a non-linear one — correlation only catches straight-line relationships).
-- **Two features correlated > ~0.9 with each other** = multicollinearity. They're saying the same thing. For **linear models** this is harmful (unstable coefficients) → drop one or use Ridge. For **tree models** it's mostly harmless but you can still drop one for simplicity.
-- A feature **highly correlated with the target** = a strong predictor, good news.
-
-`sns.pairplot(df_tr, hue='target')` is the "show me everything" version for small datasets (≤ ~6 numeric columns); skip it when you have many columns (too slow, unreadable).
-
-> **End of EDA, write a 5-line summary to yourself:** which columns look predictive, which look useless, which are skewed, which have outliers, which have missing values, and whether relationships look linear or non-linear. That summary *is* your preprocessing plan.
-
----
 
 ## PART 5 — PREPROCESSING: the fixed order (this is your flowchart)
 
