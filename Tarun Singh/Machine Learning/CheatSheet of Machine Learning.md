@@ -82,40 +82,137 @@ from sklearn.preproessing import LabelEncoder
 from sklearn.preprocessing import OrdinalEncoder
 oe = OrdinalEncoder(categories=['Poor','Average','Good'])
 ```
-### Column Transformer
+
+### Pipelines & ColumnTransformer
+
+> [!abstract] TL;DR / Note / IMP - Hacks
+> 
+> - **Pipeline** = sequential vertical stack. Data flows top → bottom.
+> - **ColumnTransformer** = parallel horizontal branches. Different columns go different ways, then concatenated.
+> - Nest them: Pipelines inside ColumnTransformers inside a Pipeline. This is normal.
+> - Always feed **raw DataFrames** into the pipeline. Never bypass it.
+> - pipline/column_trans.set_output(transform='pandas')  -> this will return dataframe as output
+> - ('removing_irrelevent_columns', 'drop', ['c1','c2'] # this will drop irrelevent column dataframe with the help of column transformer  --> 
+#### `Pipeline` — Sequential
+Data flows through **top to bottom**. Step N receives the output of step N−1.
+
+```
+    input
+      ↓
+    step1  (transformer)
+      ↓
+    step2  (transformer)
+      ↓
+    step3  (model / transformer)
+      ↓
+    output
+```
+
+> [!tip] Rule A Pipeline **inherits the methods of its last step**.
+> 
+> - Last step = transformer → pipeline has `fit_transform(x_train)`, `transform(x_test)'
+> - Last step = model → pipeline has `fit(x_train,y_train)`, `predict(x_test)`
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipe = Pipeline([
+    ('step1', SomeTransformer()),
+    ('step2', AnotherTransformer()),
+    ('step3', SomeModel()),
+])
+pipe.set_output(transform='pandas')   # very imp
+```
+
+#### `ColumnTransformer` — Parallel Branches
+Data is **sliced by column** into independent branches. Each branch runs on its slice, then all outputs are **concatenated side by side**.
+
+```
+              input (DataFrame)
+                    │
+        ┌───────────┼───────────┐
+        ↓           ↓           ↓
+     cols[a,b]  cols[c,d]   cols[e,f]
+        ↓           ↓           ↓
+      trf1        trf2        trf3
+        ↓           ↓           ↓
+        └───── concatenate ─────┘
+                    ↓
+                 output
+```
+
+> [!warning] Not sequential Each branch sees the **original input** for its columns. `trf2` does **not** see `trf1`'s output. They run independently.
+
 ```python
 from sklearn.compose import ColumnTransformer
-transformer = ColumnTransformer(transformers = [
-	('tnf1', OrderinalEncoder(), ['col1', 'col2']),
-	('tnf2', _, ['col3', 'col4']),
-	('tnf3', _, ['col5', 'col6']),
-	], remainder='passthrough/drop')
-""" 
-Note -> here instead of column name we can also give column index [0,1]
-"""
+
+transformer = ColumnTransformer(
+    transformers=[
+        ('name1', SomeTransformer(), ['col1', 'col2']),
+        ('name2', OtherTransformer(), ['col3']),
+    ],
+    remainder='passthrough'   # or 'drop' or another transformer
+)
 ```
-### Pipeline
+
+Example:
 ```python
-from sklearn.pipeline import Pipeline,make_pipeline
+# Input columns: [age, city, salary, gender]
+ColumnTransformer([
+    ('ohe', OneHotEncoder(), ['city', 'gender']),
+], remainder='passthrough')
+```
 
-# trandformer 1
-trf1 = ColumnTransformer( transformers=[ 
-		('impute_age',SimpleImputer(),[2]), 
-		('impute_embarked',SimpleImputer(),[6]) 
-	],remainder='passthrough')
-	
-# trandformer 2
-trf2 = ColumnTransformer( transformers=[ 
-		('ohe',OneHotEncoder(),[1,2])
-	],remainder='passthrough')
+Output columns, in this order:
+1. `city_delhi`, `city_mumbai`, ... ← from OHE on `city`
+2. `gender_M`, `gender_F` ← from OHE on `gender`
+3. `age`, `salary` ← from `remainder='passthrough'`
 
-trf3 = DecisionTreeClassifier()
+The original `city` and `gender` are **gone**. They were consumed and replaced by their OHE output.
 
-pipe = Pipeline([ 
-		('trf1',trf1), 
-		('trf2',trf2), 
-		('trf3',trf3),
-	])
+
+- If you list the same column twice:
+
+```python
+ColumnTransformer([
+    ('trf1', Transformer1(), ['a']),
+    ('trf2', Transformer2(), ['a']),
+], remainder='passthrough')
+```
+
+- `trf1` gets the **original** `a`.
+- `trf2` also gets the **original** `a` (NOT trf1's output).
+- Output has: `trf1(a)`, `trf2(a)` — column `a` appears twice, transformed two different ways.
+- Original `a` does **not** come through `remainder` (it was "used").
+#### Pipeline inside a column Transformer
+
+```python
+numeric_pipeline = Pipeline([
+    ('impute', SimpleImputer(strategy='median')),
+    ('scale', StandardScaler()),
+])
+
+preprocessor = ColumnTransformer([
+    ('num', numeric_pipeline, ['age', 'fare']),   # ← pipeline as a branch
+], remainder='drop')
+```
+
+
+
+#### Debug in isolation
+Before wiring into a pipeline, test the transformer alone:
+```python
+fe = FeatureEngineering()
+result = fe.fit_transform(X_train)
+print(result.head())
+print(result.columns.tolist())
+```
+#### 8.4 Useful inspection
+```python
+pipeline.get_feature_names_out()           # output column names
+pipeline.set_output(transform='pandas')    # return DataFrames
+pipeline.named_steps['preprocess']         # access a specific step
+pipeline['preprocess']                     # shorthand
 ```
 
 ### Normally Distribution Of Data
@@ -326,9 +423,134 @@ classifier = BalancedRandomForestClassifier(random_state=42)
 #class weights
 model = LogisticRegression(class_weight={0:5,1:1})
 ```
-### Normal Distribution - QQ Plot
+### Making your own column transformer
 
+```python 
+from sklearn.base import BaseEstimator, TransformerMixin
+import pandas as pd
+
+class ColumnDropper(BaseEstimator, TransformerMixin):
+    def __init__(self, columns_to_drop):
+        self.columns_to_drop = columns_to_drop
+
+    def fit(self, X, y=None):
+        return self  # nothing to learn
+
+    def transform(self, X):
+        X = X.copy()
+        return X.drop(columns=self.columns_to_drop, errors="ignore")        
+
+
+
+# how to use it
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+preprocessor = ColumnTransformer(transformers=[
+    ("num", StandardScaler(), ["age", "salary"]),
+    ("cat", OneHotEncoder(handle_unknown="ignore"), ["city"]),
+])
+pipeline = Pipeline(steps=[
+    ("drop_ids", ColumnDropper(columns_to_drop=["user_id", "transaction_id"])),
+    ("preprocess", preprocessor),
+    ("model", SomeModel()),
+])
+
+```
 ## Matrics
+
+### Regression Metrics
+
+| Metric | Formula | Unit | Outlier robust? | Note |
+| ------ | ------- | ---- | --------------- | ---- |
+| **MSE** | $\frac{1}{n}\sum (y_i-\hat{y}_i)^2$ | squared unit of y | ❌ | differentiable -> good as a loss function |
+| **MAE** | $\frac{1}{n}\sum \|y_i-\hat{y}_i\|$ | same as y | ✅ | not differentiable at 0 |
+| **RMSE** | $\sqrt{\frac{1}{n}\sum (y_i-\hat{y}_i)^2}$ | same as y | ❌ | MSE brought back to y's unit |
+| **R2** | $1-\frac{\sum (y_i-\hat{y}_i)^2}{\sum (y_i-\bar{y})^2}$ | none (0-1) | — | how much better than just predicting the mean |
+| **Adj R2** | $1-\frac{(1-R^2)(n-1)}{n-p-1}$ | none | — | punishes useless columns |
+
+- **R2** aka "coefficient of determination" / "goodness of fit", closer to 1 = better
+	- Div = adding **any** new feature (even an irrelevant one) increases R2 -> that's why Adjusted R2 exists
+- **Adjusted R2** only goes up if the new feature actually helps (n = data points, p = number of input columns)
+```Python
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+y_pred = lr.predict(X_test)
+
+print("MAE",  mean_absolute_error(y_test,y_pred))
+print("MSE",  mean_squared_error(y_test,y_pred))
+print("RMSE", np.sqrt(mean_squared_error(y_test,y_pred)))
+print("R2",   r2_score(y_test,y_pred))
+
+# Adjusted R2
+r2 = r2_score(y_test,y_pred)
+n = X_test.shape[0]   # number of data points
+p = X_test.shape[1]   # number of input columns
+adj_r2 = 1 - ((1-r2)*(n-1)/(n-p-1))
+```
+
+### Classification Metrics
+- Confusion Matrix (binary)
+
+|                | Predicted 0         | Predicted 1         |
+| -------------- | ------------------- | ------------------- |
+| **Actual 0**   | TN                  | FP (Type 1 error)   |
+| **Actual 1**   | FN (Type 2 error)   | TP                  |
+
+- **FP / Type 1** = predicted positive, actually negative -> a false alarm
+- **FN / Type 2** = predicted negative, actually positive -> **this is about missing it**
+
+| Metric | Formula | Question it answers | Use when |
+| ------ | ------- | ------------------- | -------- |
+| **Accuracy** | $\frac{TP+TN}{TP+TN+FP+FN}$ | overall how many did I get right | balanced dataset only |
+| **Precision** | $\frac{TP}{TP+FP}$ | when model says positive, how often right? | minimise **FP** -> spam classifier |
+| **Recall / TPR** | $\frac{TP}{TP+FN}$ | out of all real positives, how many did I find? | minimise **FN** -> cancer detector |
+| **F1 Score** | $\frac{2 \cdot P \cdot R}{P+R}$ | harmonic mean of the two | FP and FN equally important |
+
+- All of these have to be **maximised**
+- **Accuracy Div** = misleading on imbalanced data + does not tell you *which* type of error you are making
+- Precision ⬆ = Recall ⬇ (the threshold trade off)
+- Multi class -> `average=` param
+	- **macro** = simple average over classes (all classes matter equally) -> use for **nominal** categories
+	- **weighted** = average weighted by class support -> use for **ordinal** categories / imbalanced data
+	- **micro** = global count of TP/FP/FN (equals accuracy in single label problems)
+- **ROC-AUC**
+	- Curve of **TPR** $\frac{TP}{TP+FN}$ on y-axis vs **FPR** $\frac{FP}{FP+TN}$ on x-axis, plotted at every threshold
+	- AUC = area under it -> 1.0 = perfect, 0.5 = random guessing, <0.5 = worse than random
+	- Threshold independent -> tells how well the model **separates** the classes
+	- Needs `predict_proba()` not `predict()`
+	- For heavily imbalanced data prefer **Precision-Recall AUC** over ROC-AUC
+```Python
+# binary class classification
+from sklearn.metrics import (accuracy_score, confusion_matrix, recall_score,
+                             precision_score, f1_score, classification_report,
+                             roc_auc_score, roc_curve)
+y_pred = lr.predict(X_test)
+
+print("Accuracy",         accuracy_score(y_test,y_pred))
+print("Confusion matrix", confusion_matrix(y_test,y_pred))
+print("Precision - ",     precision_score(y_test,y_pred))
+print("Recall - ",        recall_score(y_test,y_pred))
+print("F1 score - ",      f1_score(y_test,y_pred))
+
+# everything in one go
+print(classification_report(y_test,y_pred))
+
+# multi class classification
+# use macro when categories are nominal and weighted when categories are ordinal
+precision_score(y_test,y_pred,average='weighted')
+recall_score(y_test,y_pred,average='weighted')
+f1_score(y_test,y_pred,average='weighted')
+
+precision_score(y_test,y_pred,average='macro')
+recall_score(y_test,y_pred,average='macro')
+f1_score(y_test,y_pred,average='macro')
+
+# ROC-AUC -> needs probabilities
+y_prob = lr.predict_proba(X_test)[:,1]
+print("ROC-AUC", roc_auc_score(y_test, y_prob))
+fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+plt.plot(fpr,tpr); plt.plot([0,1],[0,1],'--')
+```
 
 ## Hyper Parameter Tunning
 [[HyperParamterTunning]]
@@ -385,14 +607,206 @@ poly = PolynomialFeatures(degree=2,include_bias=True) X_trf = poly.fit_transform
 ```Python
 from sklearn.tree import DecisionTreeRegressor, DecisonTreeClassifier
 ```
-## Questions?
-- how to find a column following a normal distribution or some other distribution ? - for normal 'qq plot'?
-- Changing the numerical column distribution to normal -> helpful in which kind of algos
-- what is mcar, mar, mnar
-- when we are doing missing value imputation -> how can we find out what kind of missing data we have -> like mcar, mar, mnar
-- What kind of imputation technique we need to apply if we find out what kind of missing value we have like -> mcar, mar, mnar
-- How can i do the compariosn of before and after of the both numerical and categorical column to find out does it not cause in -> chaneg in distribution or ration right? 
-- Multivritae imputer will get applied to all column missing value right we cant apply then on one column right? and how this iterative imputer work in short ok -> and ist imp parameter also most imp paramter to know.
-- Th complete outlier deteiction and handling part -> i ahve a lot questions like what if i do not have any indepth knowlege of the column and i know it is not nomally distributed then only one way -> interQunatile proximity based approach left right? -> now -> but for all the column is it correct to just remove the extreme value on the basis of this?? -> and also the traetmnt of those value need pandas code which will never fit in the pipeline of the sklearn right? is the correct way of handling the outliers? (like not having them in pipeline)
-- How to knwo when to convert a numerical column to categorical column ? when they have lot of extremen values?? like no range?
-- How can we implement multi stage stacking with sklearn 
+
+### Gradient Decent
+- Optimizing technique -> give it a differentiable function, it returns the minima
+- Types
+	- **Batch:** whole data in one go per update, slow on big data, smooth convergence
+	- **Stochastic (SGD):** 1 row per update, fast + noisy, can escape local minima
+	- **Mini Batch:** batch of rows per update, the practical middle ground
+- Used by = Linear Regression, Logistic Regression, ANN -> so **scale the data (Standardization)**
+- learning rate too high = overshoot/diverge, too low = very slow convergence
+```Python
+from sklearn.linear_model import SGDRegressor, SGDClassifier
+sgd = SGDRegressor(
+	loss='squared_error',      # 'hinge'/'log_loss' for SGDClassifier
+	learning_rate='invscaling', # 'constant','optimal','adaptive'
+	eta0=0.01,                 # initial learning rate
+	max_iter=1000,
+	penalty='l2'               # 'l1','elasticnet',None -> regularization
+)
+```
+
+### K Nearest Neighbors
+- Lazy learner -> stores points at train time, all the work happens at predict time (slow prediction)
+- Working: distance of point P to all points -> pick k closest -> majority vote (classification) / mean (regression)
+- Keep **k odd** to avoid ties. Low k = over-fitting, high k = under-fitting
+- **Must standardize** the data (distance based)
+- Limitations: large data, high dimensional data (curse of dimensionality), outliers, imbalanced data, features with different scales
+- **n_neighbors:** int, default=5, the k
+- **weights:** {'uniform','distance'}, default='uniform', 'distance' = closer neighbours count more
+- **metric:** default='minkowski' , **p:** 1 = manhattan, 2 = euclidean
+- **algorithm:** {'auto','ball_tree','kd_tree','brute'}, default='auto'
+```Python
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+knn = KNeighborsClassifier(n_neighbors=3)
+
+# choosing the best k
+scores=[]
+for i in range(1,16):
+	knn = KNeighborsClassifier(n_neighbors=i)
+	knn.fit(X_train,y_train)
+	scores.append(accuracy_score(y_test, knn.predict(X_test)))
+plt.plot(range(1,16),scores)
+```
+
+### Naive Bayes
+- Based on Bayes theorem with the "naive" assumption -> all the features are independent of each other
+- Very fast, works well on text/document classification and high dimensional data
+- Which one to use
+	- **GaussianNB:** numerical input columns
+	- **MultinomialNB:** count/categorical input columns -> document classification
+	- **CategoricalNB:** categorical input columns -> recommendation system, medical diagnosis
+	- **BernoulliNB:** binary(0/1) input columns
+	- Mix of numerical + categorical -> use either GaussianNB or MultinomialNB
+- **alpha:** float, default=1.0, Laplace/additive smoothing -> handles the zero probability problem
+- **fit_prior:** bool, default=True, learn class prior probabilities or assume uniform
+```Python
+from sklearn.naive_bayes import GaussianNB, MultinomialNB, CategoricalNB, BernoulliNB
+nb = MultinomialNB(alpha=1.0)
+```
+
+### SVM
+- Finds the hyperplane with the **maximum margin** between classes; points on the margin = support vectors
+- Hard margin = no misclassification allowed, Soft margin = allows some misclassification (C controls it)
+- **Kernel trick** = project data into higher dimension to make non-linear data linearly separable
+- **Scale the data** before using SVM
+- **C:** float, default=1.0, inverse of regularization -> small C = wide margin/more errors allowed (under-fit), large C = narrow margin (over-fit)
+- **kernel:** {'linear','poly','rbf','sigmoid'}, default='rbf'
+- **gamma:** {'scale','auto'} or float, default='scale', how far a single point's influence reaches -> high gamma = over-fitting
+- **degree:** int, default=3, only for kernel='poly'
+- **epsilon:** float, default=0.1, SVR only -> the tube inside which no penalty is given
+```Python
+# classification
+from sklearn.svm import SVC
+svm_classifier = SVC(kernel='linear', C=1.0, random_state=42)
+
+# regression
+from sklearn.svm import SVR
+svr = SVR(kernel='rbf', C=100, gamma=0.1, epsilon=.1)
+```
+
+### Ensemble Learning
+- Types: Voting, Bagging (ex- Random Forest), Boosting (ex- Adaboost, Gradient Boosting, XGBoost), Stacking
+- Advantage = better performance, less bias and variance, robustness | Disadvantage = computation increases
+
+| Bagging                                    | Boosting                                   |
+| ------------------------------------------ | ------------------------------------------ |
+| Use models with Low bias and high variance | Use models with high bias and low variance |
+| Parallel learning possible                 | Sequential Learning                        |
+| Base model weightage is equal              | Base model weightage is not equal          |
+
+#### Voting
+- All base models should be **independent/dis-similar** and each should have minimum accuracy of 0.51
+- classification = hard voting (mode) / soft voting (average of probabilities) , regression = mean
+```Python
+from sklearn.ensemble import VotingClassifier, VotingRegressor
+estimators = [('lr',LogisticRegression()),('rf',RandomForestClassifier()),('knn',KNeighborsClassifier())]
+vc = VotingClassifier(estimators=estimators, voting='hard') # 'soft'
+```
+
+#### Bagging
+- Bagging = Bootstrapping (random sample of data **with replacement**) + Aggregation (mean = regression, mode = classification)
+- Types
+	- **Bagging** = row sampling with replacement
+	- **Pasting** = row sampling without replacement
+	- **Random Subspaces** = column sampling (with/without replacement)
+	- **Random Patches** = row + column sampling
+```Python
+from sklearn.ensemble import BaggingClassifier, BaggingRegressor
+bag = BaggingClassifier(
+	estimator=DecisionTreeClassifier(),
+	n_estimators=500,
+	max_samples=0.5,          # row sampling
+	bootstrap=True,           # row replacement -> False = Pasting
+	max_features=0.5,         # column sampling -> Random Subspaces/Patches
+	bootstrap_features=False, # column replacement
+	random_state=42, n_jobs=-1)
+```
+
+#### Random Forest
+- Random = Bagging, Forest = group of Decision Trees | fully grown tree = low bias + high variance
+- Difference from Bagging: only Decision Trees + column sampling happens at **node level** (bagging = model level)
+- **n_estimators:** int, default=100
+- **max_features:** {'sqrt','log2',None}, int or float, default='sqrt'
+- **bootstrap:** bool, default=True , **max_samples:** int or float, default=None
+- plus all the Decision Tree params (max_depth, min_samples_split, ...)
+```Python
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+```
+
+#### Adaboost
+- Stage wise additive method -> weak learners (mostly **decision stumps**, max_depth=1) added one by one
+- Each stage increases the weight of misclassified rows, and each model gets its own weightage (alpha)
+- **estimator:** object, default=None (None = Decision Tree stump)
+- **n_estimators:** int, default=50 , **learning_rate:** float, default=1.0
+- **algorithm:** {'SAMME','SAMME.R'}, default='SAMME.R'
+```Python
+from sklearn.ensemble import AdaBoostClassifier, AdaBoostRegressor
+```
+
+#### Stacking
+- Train multiple **base models** on data -> feed their predictions as input to a **meta model** along with the y column
+- Over-fitting is the main risk, 2 ways to avoid it
+	- **Blending / Hold out:** split train into D1 & D2, train base models on D1, predict D2, train meta model on those predictions (not supported by sklearn)
+	- **Stacking / K-Fold:** cross-validated out-of-fold predictions feed the meta model (this is what sklearn does)
+```Python
+from sklearn.ensemble import StackingClassifier, StackingRegressor
+estimators = [
+	('rf', RandomForestClassifier(n_estimators=10, random_state=42)),
+	('knn', KNeighborsClassifier(n_neighbors=10)),
+	('gbdt', GradientBoostingClassifier())
+]
+clf = StackingClassifier(
+	estimators=estimators,
+	final_estimator=LogisticRegression(),
+	cv=10   # cv acts as the k of k-fold
+)
+```
+
+### Gradient Boosting
+- Sequential stage wise addition -> every next model is trained on the **residual/gradient (loss)** of the previous one
+- Prediction = initial guess (mean/log-odds) + learning_rate * (sum of all the tree outputs)
+
+| Adaboost                                      | Gradient Boosting                                         |
+| --------------------------------------------- | --------------------------------------------------------- |
+| Use decision stumps which have max depth of 1 | Use decision trees which have max depth in between (8-32) |
+| we assign a different weight to each model    | we assign a single learning rate for each model           |
+
+- **n_estimators:** int, default=100 , **learning_rate:** float, default=0.1 -> trade off between the two
+- **max_depth:** int, default=3
+- **subsample:** float, default=1.0, <1.0 = Stochastic Gradient Boosting
+- **loss:** 'squared_error'/'absolute_error'/'huber' (reg) , 'log_loss'/'exponential' (clf)
+```Python
+from sklearn.ensemble import GradientBoostingRegressor, GradientBoostingClassifier
+gb_reg = GradientBoostingRegressor(
+	n_estimators=100,
+	learning_rate=0.1,
+	max_depth=3,
+	random_state=42
+)
+```
+
+### XGBoost
+- Optimized gradient boosting. Why it is better
+	- **Performance:** regularised learning objective, handles missing values, sparsity aware split finding, tree pruning, efficient split finding (weighted quantile sketch + approximate tree learning)
+	- **Speed:** GPU support, distributed computing, cache awareness, parallel processing, optimized data structure, out of core computing
+	- **Flexibility:** cross platform, multiple languages, integration with other libraries, supports all kinds of ML problems
+- **n_estimators / learning_rate (eta) / max_depth:** the main 3 knobs
+- **reg_lambda (L2), reg_alpha (L1), gamma:** regularization -> gamma = minimum loss reduction needed to make a split
+- **subsample:** row sampling , **colsample_bytree:** column sampling
+- **scale_pos_weight:** for imbalanced dataset
+- **early_stopping_rounds:** stop when validation score stops improving
+```Python
+from xgboost import XGBClassifier, XGBRegressor
+xgb = XGBClassifier(
+	n_estimators=100,
+	learning_rate=0.1,
+	max_depth=3,
+	subsample=0.8,
+	colsample_bytree=0.8,
+	reg_lambda=1,
+	random_state=42
+)
+xgb.fit(X_train, y_train)
+```

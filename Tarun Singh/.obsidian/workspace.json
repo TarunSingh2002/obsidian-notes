@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "3333ff75f99b2a81",
+        "id": "15130573a98080ec",
         "type": "tabs",
         "children": [
           {
-            "id": "1fd5c56dacdfd696",
+            "id": "6332538d9be0426c",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Maths For Data Science/Probability.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Probability"
+              "title": "New tab"
             }
           }
         ]
@@ -41,7 +37,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -78,7 +76,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 324.5
+    "width": 324.5,
+    "collapsed": true
   },
   "right": {
     "id": "eeaa25e87f210d6a",
@@ -184,54 +183,54 @@
       "bases:Create new base": false
     }
   },
-  "active": "1fd5c56dacdfd696",
+  "active": "6332538d9be0426c",
   "lastOpenFiles": [
-    "MLOps/DVC.md",
-    "MLOps/MLFlow.md",
-    "Machine Learning/EDA_Deep_Dive_Guide.md",
-    "Machine Learning/ML_Workflow_Decision_Guide.md",
+    "Machine Learning/CheatSheet-PyTorch.md",
+    "Machine Learning/CheatSheet-Tensorflow.md",
     "Machine Learning/CheatSheet of Machine Learning.md",
+    "CheatSheet-Tensorflow",
     "Machine Learning/Basics of Machine Learning.md",
-    "Machine Learning/Matrics.md",
-    "Maths For Data Science/Statistics.md",
+    "Machine Learning/Algos/Decision Tree.md",
+    "Machine Learning/Algos/Ensemble Learning.md",
+    "Machine Learning/Algos/Gradient Decent.md",
+    "Machine Learning/Algos/Gradient Boosting.md",
+    "Machine Learning/Algos/Linear Regression.md",
+    "Machine Learning/Algos/K Nearest Neighbors.md",
+    "Machine Learning/Algos/Logistic Regression.md",
+    "Machine Learning/Algos/Naive Bayes.md",
+    "Machine Learning/Algos/SVM.md",
+    "Machine Learning/Algos/XGBoost.md",
+    "Machine Learning/HyperParamterTunning.md",
+    "Machine Learning/Feature Engineering.md",
+    "Machine Learning/EDA_Deep_Dive_Guide.md",
+    "MLOps/MLFlow.md",
+    "MLOps/DVC.md",
+    "AWS/Amazon EC2.md",
+    "AWS/AWS Basis.md",
+    "AWS/Billing And Cost Management.md",
     "AWS/IAM.md",
+    "Attachments/Pasted image 20260720025005.png",
+    "Attachments/Pasted image 20260720024829.png",
+    "Attachments/Pasted image 20260717010755.png",
+    "Maths For Data Science/Probability.md",
+    "Machine Learning/ML_Workflow_Decision_Guide.md",
+    "Machine Learning/Matrics.md",
     "Attachments/Pasted image 20260709005054.png",
     "Attachments/Pasted image 20260709004738.png",
     "Attachments/Pasted image 20260709004216.png",
     "Attachments/Pasted image 20260709004135.png",
-    "Python/Logger.md",
     "Attachments/Pasted image 20260627180111.png",
     "Attachments/Pasted image 20260627175752.png",
     "Attachments/Pasted image 20260627175002.png",
-    "AWS/AWS Basis.md",
-    "Attachments/Pasted image 20260627162620.png",
-    "Attachments/Pasted image 20260627162433.png",
-    "Attachments/Pasted image 20260627161709.png",
-    "Reinforcement Learning/Exploration vs Exploitation.md",
-    "Reinforcement Learning/Reinforcement-Learning-Basics.md",
-    "Reinforcement Learning/Tic-Tac-Toe.md",
-    "AI-Engineer/LangGraph/Agentic AI Basics.md",
-    "AI-Engineer/LangGraph/Workflows.md",
     "AWS",
-    "Navigation/AI-Engineer-Navigation.md",
     "AI-Engineer/LangGraph",
     "AI-Engineer",
-    "AI Engineer/LangChain.md",
-    "Navigation/Machine-Learning-Navigation.md",
     "AI Engineer",
-    "Machine Learning/HyperParamterTunning.md",
-    "Machine Learning/Feature Engineering.md",
-    "2026-05-12.md",
-    "Machine Learning/Clustering/K-Mean Clustering.md",
-    "Machine Learning/Clustering/Hierarchical Clustering.md",
     "Machine Learning/Clustering",
-    "Machine Learning/Algos/XGBoost.md",
-    "Machine Learning/Algos/SVM.md",
     "Python",
     "MLOps",
     "MLFlow",
     "Machine Learning/Algos",
-    "Machine Learning",
     "Untitled.canvas"
   ]
 }

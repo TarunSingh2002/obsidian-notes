@@ -51,8 +51,6 @@ with mlflow.start_run() as run:
     with open("run_id.txt", "w") as f:
         f.write(run.info.run_id)
 
-
-
 # In every later stage:
 run_id = open("run_id.txt").read().strip()
 with mlflow.start_run(run_id=run_id):   # resumes the SAME run
