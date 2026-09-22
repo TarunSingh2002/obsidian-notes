@@ -4,17 +4,41 @@
     "type": "split",
     "children": [
       {
-        "id": "15130573a98080ec",
+        "id": "9965936d27a8601a",
         "type": "tabs",
         "children": [
           {
-            "id": "6332538d9be0426c",
+            "id": "0f5e6f757007a80e",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Ultimate-Practical-Cheat-Sheet"
+            }
+          }
+        ]
+      },
+      {
+        "id": "e6e1e69b9ef2bf04",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f16944b43de813ec",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Machine Learning/EDA/EDA_Draft1.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "EDA_Draft1"
             }
           }
         ]
@@ -183,26 +207,33 @@
       "bases:Create new base": false
     }
   },
-  "active": "6332538d9be0426c",
+  "active": "0f5e6f757007a80e",
   "lastOpenFiles": [
-    "Machine Learning/CheatSheet-PyTorch.md",
-    "Machine Learning/CheatSheet-Tensorflow.md",
-    "Machine Learning/CheatSheet of Machine Learning.md",
+    "Machine Learning/EDA/EDA_Draft1.md",
+    "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
+    "Machine Learning/Theory/HyperParamterTunning.md",
+    "Machine Learning/Cheat-Sheet/CheatSheet of Machine Learning.md",
+    "Machine Learning/EDA/EDA_Draft2.md",
+    "Machine Learning/Theory/Basics of Machine Learning.md",
+    "Machine Learning/Cheat-Sheet",
+    "Machine Learning/Theory/Matrics.md",
+    "Machine Learning/Theory/Feature Engineering.md",
+    "Machine Learning/Theory",
+    "Machine Learning/EDA",
+    "Deep Learning",
+    "Deep Learning/CheatSheet-PyTorch.md",
+    "Deep Learning/CheatSheet-Tensorflow.md",
     "CheatSheet-Tensorflow",
-    "Machine Learning/Basics of Machine Learning.md",
-    "Machine Learning/Algos/Decision Tree.md",
-    "Machine Learning/Algos/Ensemble Learning.md",
-    "Machine Learning/Algos/Gradient Decent.md",
-    "Machine Learning/Algos/Gradient Boosting.md",
-    "Machine Learning/Algos/Linear Regression.md",
-    "Machine Learning/Algos/K Nearest Neighbors.md",
-    "Machine Learning/Algos/Logistic Regression.md",
-    "Machine Learning/Algos/Naive Bayes.md",
-    "Machine Learning/Algos/SVM.md",
-    "Machine Learning/Algos/XGBoost.md",
-    "Machine Learning/HyperParamterTunning.md",
-    "Machine Learning/Feature Engineering.md",
-    "Machine Learning/EDA_Deep_Dive_Guide.md",
+    "Machine Learning/Theory/Algos/Decision Tree.md",
+    "Machine Learning/Theory/Algos/Ensemble Learning.md",
+    "Machine Learning/Theory/Algos/Gradient Decent.md",
+    "Machine Learning/Theory/Algos/Gradient Boosting.md",
+    "Machine Learning/Theory/Algos/Linear Regression.md",
+    "Machine Learning/Theory/Algos/K Nearest Neighbors.md",
+    "Machine Learning/Theory/Algos/Logistic Regression.md",
+    "Machine Learning/Theory/Algos/Naive Bayes.md",
+    "Machine Learning/Theory/Algos/SVM.md",
+    "Machine Learning/Theory/Algos/XGBoost.md",
     "MLOps/MLFlow.md",
     "MLOps/DVC.md",
     "AWS/Amazon EC2.md",
@@ -212,9 +243,6 @@
     "Attachments/Pasted image 20260720025005.png",
     "Attachments/Pasted image 20260720024829.png",
     "Attachments/Pasted image 20260717010755.png",
-    "Maths For Data Science/Probability.md",
-    "Machine Learning/ML_Workflow_Decision_Guide.md",
-    "Machine Learning/Matrics.md",
     "Attachments/Pasted image 20260709005054.png",
     "Attachments/Pasted image 20260709004738.png",
     "Attachments/Pasted image 20260709004216.png",
@@ -226,11 +254,7 @@
     "AI-Engineer/LangGraph",
     "AI-Engineer",
     "AI Engineer",
-    "Machine Learning/Clustering",
-    "Python",
-    "MLOps",
-    "MLFlow",
-    "Machine Learning/Algos",
+    "Machine Learning/Theory/Clustering",
     "Untitled.canvas"
   ]
 }
