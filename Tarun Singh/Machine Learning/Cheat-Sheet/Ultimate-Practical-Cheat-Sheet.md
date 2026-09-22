@@ -24,12 +24,14 @@ plot_df = df_tr.sample(min(len(df_tr), 20_000), random_state=42)  # for scatter 
 	- shape 
 	- number of duplicated rows
 	- Columns with huge missing %.
+	- Check for Impossible values
 ```Python
 df.shape
 df.head()
 df.info()
 df.isnull().mean().mul(100).sort_values(ascending=False)
 df.duplicated().sum()
+df.describe()
 ```
 #### Split
 
@@ -45,8 +47,19 @@ X_train, X_test, y_train, y_test = train_test_split(
 ```
 
 ### EDA
-
-
+- Divide the columns in their type -> Continuous numeric, Discrete numeric, Ordinal categorical, Nominal categorical, Datetime, Binary, Constant
+- Study target column 
+	- Help us Choose the right metrics with and understand the target column
+	- Regression target
+		- `sns.histplot(x=y_train, kde=True); plt.show(); print("skew:", y_train.skew().round(2), "| min:", y_train.min(), "| max:", y_train.max())`
+	- Classification target
+		- `print(y_train.value_counts(normalize=True)); sns.countplot(x=y_train); plt.show()`
+		- Multiclass classification with imbalance: print the share of _every_ class; classes with a handful of rows can't be learned — consider merging them or accept poor performance there.
+- Univariate
+	- 
+- Bivariate
+- Multivariate
+- 
 ### Feature Engineering
 #### Order Of Preprocessing
 
