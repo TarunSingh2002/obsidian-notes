@@ -2,6 +2,7 @@
 ### Basics
 #### basic setup
 ```python
+
 import numpy as np, pandas as pd
 import seaborn as sns, matplotlib.pyplot as plt
 import scipy.stats as stats
@@ -47,19 +48,167 @@ X_train, X_test, y_train, y_test = train_test_split(
 ```
 
 ### EDA
-- Divide the columns in their type -> Continuous numeric, Discrete numeric, Ordinal categorical, Nominal categorical, Datetime, Binary, Constant
-- Study target column 
-	- Help us Choose the right metrics with and understand the target column
-	- Regression target
-		- `sns.histplot(x=y_train, kde=True); plt.show(); print("skew:", y_train.skew().round(2), "| min:", y_train.min(), "| max:", y_train.max())`
-	- Classification target
-		- `print(y_train.value_counts(normalize=True)); sns.countplot(x=y_train); plt.show()`
-		- Multiclass classification with imbalance: print the share of _every_ class; classes with a handful of rows can't be learned — consider merging them or accept poor performance there.
-- Univariate
-	- 
-- Bivariate
-- Multivariate
-- 
+
+#### Step 0 
+Divide the columns in their type -> Continuous numeric, Discrete numeric, Ordinal categorical, Nominal categorical, Datetime, Binary, Constant
+#### Step 1 - Study target column 
+- Help us Choose the right metrics with and understand the target column
+- Regression target
+	- `sns.histplot(x=y_train, kde=True); plt.show(); print("skew:", y_train.skew().round(2), "| min:", y_train.min(), "| max:", y_train.max())`
+- Classification target
+	- `print(y_train.value_counts(normalize=True)); sns.countplot(x=y_train); plt.show()`
+	- Multiclass classification with imbalance: print the share of _every_ class; classes with a handful of rows can't be learned — consider merging them or accept poor performance there.
+#### Step 2 Univariate
+
+##### For columns with missing value 
+
+**Q1 — Where is it missing?** Is missingness concentrated in some group?
+
+```python
+# does missingness in 'salary' depend on another column, e.g. job type?
+print(X_train.groupby('job_type')['salary'].apply(lambda s: s.isnull().mean()))
+```
+
+If yes (e.g. salary missing mostly for 'freelancer') → the holes are not random; imputing with one global median is crude — group-wise thinking, or at least an indicator, is warranted.
+
+**Q2 — Does the HOLE itself carry signal?** The most valuable check. Plain question: _do rows with a hole behave differently on the target?_
+
+```python
+for c in X_train.columns[X_train.isnull().any()]:
+    print(c)
+    print(df_tr.groupby(X_train[c].isnull())[TARGET].agg(['mean', 'count']), "\n")
+```
+
+If the target mean clearly differs between has-hole and no-hole rows → the _fact of absence_ is information (people who hide their income are different from people who report it) → plan `SimpleImputer(add_indicator=True)` so the model receives that fact. If the means match → plain imputation loses nothing.
+##### Categorical Columns and Binary Columns
+- Check the cardinality `X_train[col].nunique()`
+- Check the frequency `X_train[col].value_counts()` `sns.countplot(x=X_train[col])`
+- Tips = Rare labels, delete them or merge them.
+- Tips = **A 60/40 or even 90/10 binary is fine. A 99.5/0.5 binary is a near-constant → drop candidate — but peek at its bivariate first: if the rare 0.5% strongly predicts the target, it's a keeper (rare flags are sometimes gold).**
+##### Date Time Columns
+- A raw date is useless to a model; its **parts** are useful. Convert, decompose, then send each part back through Step 0 classification
+- Also check the date **range and gaps** (`d.min(), d.max()`) — a missing chunk of months means the data isn't what you think. (Cyclic encoding with sin/cos exists for month/hour; optional, later.)
+
+```python
+d = pd.to_datetime(X_train['listed_date'])
+X_train['year']       = d.dt.year                       # → discrete/ordinal
+X_train['month']      = d.dt.month                      # → ordinal, cyclic (12 sits next to 1)
+X_train['day']        = d.dt.day
+X_train['dayofweek']  = d.dt.dayofweek                  # 0=Mon … 6=Sun
+X_train['is_weekend'] = (d.dt.dayofweek >= 5).astype(int)   # → binary
+X_train['quarter']    = d.dt.quarter
+X_train['week']       = d.dt.isocalendar().week.astype(int)
+X_train['hour']       = d.dt.hour                       # if time exists
+```
+##### Numerical columns
+
+```python
+for i in numerical_continuous_column:
+    print("column name =>", i)
+    print(x_train[i].describe())
+    print("skew =>", x_train[i].skew())
+    print('kurtosis =>', x_train[i].kurt())
+    fig, ax = plt.subplots(2,2, figsize=(11,7))
+    sns.histplot(x=x_train[i], kde=True ,ax=ax[0,0], bins = 20)
+    sns.boxplot(x=x_train[i], ax=ax[0,1])
+    stats.probplot(x_train[i], dist="norm", plot=ax[1,0])
+    plt.tight_layout()
+    plt.show()
+```
+
+###### Reading describe
+- min = Help us find out do we have impossible value.
+- max = a very large value indicate, outliers may exist.
+- count = tell us about missing rows
+- mean vs 50 percentile = mean > median = right skew, and also mean get effected by outliers, so we trust the median
+###### Reading std
+- one number answering "on average, how far do values sit from the mean?"
+- std is measured **in the column's own units**. 
+- For example
+	- `[10, 10, 10, 10]` → everyone exactly at the mean → std = 0.
+	- `[0, 20, 0, 20]` → same mean (10), but everyone sits 10 away from it → std = 10. Bigger std = values more spread out. That's the whole idea.
+
+**Rule 1 = std ÷ range (range = max − min). This turns std into a scale-free score:**
+
+```python
+r = X_train[col]
+ratio = r.std() / (r.max() - r.min())
+```
+
+| std ÷ range  | plain meaning                                                 | picture   |
+| ------------ | ------------------------------------------------------------- | --------- |
+| ~0.00 – 0.05 | values almost all the same (nearly constant)                  | `▁▁█▁▁`   |
+| ~0.10 – 0.20 | bunched around the middle, bell-like                          | `▁▂▅█▅▂▁` |
+| ~0.25 – 0.35 | spread out flat/evenly across the whole range                 | `▅▅▅▅▅▅▅` |
+| ~0.40 – 0.50 | values pile at the two ENDS (0.5 is the mathematical maximum) | `█▁▁▁▁▁█` |
+**Ruler 2 — std ÷ mean** (the _coefficient of variation_, CV) — for comparing spread **across different columns**. Only valid when the column is all-positive.
+###### Reading Skewness
+
+| `.skew()`              | verdict           | action (for LINEAR models only — trees ignore skew completely) |
+| ---------------------- | ----------------- | -------------------------------------------------------------- |
+| −0.5 … +0.5            | symmetric         | nothing                                                        |
+| 0.5 … 1 (or −1 … −0.5) | mild              | usually nothing                                                |
+| **> +1**               | strong right skew | log1p or Yeo-Johnson transform                                 |
+| **< −1**               | strong left skew  | square or Yeo-Johnson transform                                |
+
+###### Reading Kurtosis
+- Kurtosis is a **"surprise tails" score**: compared to a bell curve, does this column produce **more** extreme values or **fewer**? (pandas `.kurt()` is centered so a perfect bell = 0.)
+
+| `.kurt()`               | meaning                                                                  | what you do                                                                                                   |
+| ----------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| around 0                | tails like a normal bell                                                 | nothing                                                                                                       |
+| clearly positive (> +1) | MORE extreme values than a bell — sharp peak, long tails                 | expect real outliers → go stare at the **boxplot**                                                            |
+| clearly negative (< −1) | almost NO extreme values — flat top, box-like, or several separate humps | go stare at the **histogram**: is it flat? multiple humps? only a few distinct bars (a category in disguise)? |
+###### Reading Histogram
+- A histogram chops the value range into buckets ("bins") and shows how many rows fall in each. Default bins are fine; blocky → try `bins=50`, spiky/noisy → try `bins=20`.
+
+| shape               | picture    | plain meaning                                   | everyday example                                | action                                                                             |
+| ------------------- | ---------- | ----------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Bell                | `▁▂▅█▅▂▁`  | symmetric, normal-ish                           | adult heights                                   | nothing                                                                            |
+| Right skew          | `▂█▅▃▂▁▁▁` | long right tail; mean > median                  | income                                          | log1p / YJ for linear                                                              |
+| Left skew           | `▁▁▁▂▃▅█▂` | long left tail                                  | easy-exam scores                                | square / YJ for linear                                                             |
+| Uniform / flat      | `▅▅▅▅▅▅▅`  | every value about equally common                | lottery digits; synthetic Kaggle features       | nothing — perfectly fine; **NOT droppable**                                        |
+| Bimodal (two humps) | `▂█▂▁▂█▂`  | two hidden groups mixed together                | heights of men+women combined                   | find the column that separates the humps (Step 5/6); consider a "which group" flag |
+| Spike + tail        | `█▂▁▂▂▁▁`  | one special value (often 0) plus a distribution | yearly medical spend (many people spend 0)      | add binary `is_zero` feature; log1p the rest                                       |
+| Comb / gaps         | `█▁█▁█▁█`  | only certain values occur                       | anything rounded or coded                       | it's discrete in disguise → reroute to §5.2                                        |
+| Wall at an edge     | `█▅▃▂▁`    | values piled against a hard floor/cap           | percentages at 0 or 100; sensor maxed out       | note the bound; it's a property, not an error                                      |
+| Isolated island     | `▅█▅▁▁▁▁▂` | main mass + a small far-away cluster            | heights: 170-ish cm plus a clump at 5.9 (feet!) | investigate: unit error? special segment?                                          |
+###### Boxplot 
+```
+   fliers      whisker             box              whisker      fliers
+   o  o    |------------[ Q1 ═══╪═══ Q3 ]------------|       o o o
+                               median
+   box       = the middle 50% of values (Q1 to Q3; its width = IQR)
+   whisker   = stretches to the furthest point within 1.5×IQR of the box
+   flier (o) = any point beyond the whiskers
+```
+- **Median line off-center**, or **one whisker much longer** → skew, on the long side.
+- **Fliers are NOT automatically errors.** "Beyond 1.5×IQR" is just a drawing convention; on skewed or heavy-tailed data, plenty of perfectly real values land there. A flier is an _invitation to look at the row_, never a deletion order.
+- **Weakness:** a boxplot cannot show two humps — a bimodal column and a bell can draw the same box. If kurtosis was very negative or the histogram looked lumpy, confirm with `sns.violinplot(data=X_train, x=col)` (a violin = boxplot + shape).
+
+###### QQ plot
+- Answers one question: "how close is this column to a normal bell curve?" (Useful for choosing z-score vs IQR outlier bounds later; that's about it.)
+```python
+stats.probplot(X_train[col], dist="norm", plot=plt); plt.show()
+```
+
+| pattern                       | meaning                                    |
+| ----------------------------- | ------------------------------------------ |
+| points hug the diagonal line  | ~normal                                    |
+| right end curls up (J shape)  | right skew                                 |
+| left end curls down           | left skew                                  |
+| both ends peel away (S shape) | heavier/lighter tails than normal          |
+| staircase / steps             | few distinct values → discrete in disguise |
+
+#### Step 2 Bivariate - every feature vs the TARGET
+- This is where two things get decided: **which features matter**, and **which model family to expect to win**.
+##### Number column vs numeric target
+##### Discrete Number / categorical feature × continuous target
+- **What we are doing (one line):** check — do the groups have **different target averages**?. Different target averages→ the column helps predict. Same target averages→ it doesn't. 
+
+
+
+#### Step 2 Multivariate
 ### Feature Engineering
 #### Order Of Preprocessing
 
@@ -95,6 +244,8 @@ X_train, X_test, y_train, y_test = train_test_split(
 #### Handling Missing values
 
 ```
+Is the column missing < ~5% of values? -> simple impute [median/most frequent]
+Is the column missing => 5~40% of values? -> impute + Consider a missing indicator
 Is the column missing > ~40% of values?
    └ YES → drop the column (too little signal).
    └ NO  ↓
