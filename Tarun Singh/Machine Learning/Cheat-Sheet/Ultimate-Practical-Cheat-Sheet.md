@@ -162,6 +162,14 @@ ratio = r.std() / (r.max() - r.min())
 ###### Reading Histogram
 - A histogram chops the value range into buckets ("bins") and shows how many rows fall in each. Default bins are fine; blocky → try `bins=50`, spiky/noisy → try `bins=20`.
 
+*Finding how big spike at the minimum value -- A python Trick*
+```Python
+col = X_train['Annual_Income_USD']
+# how big is the spike at the minimum?
+at_min = (col == col.min()).sum()
+print("rows at min:", at_min, "=>", at_min / len(col) * 100, "%")
+```
+
 | shape               | picture    | plain meaning                                   | everyday example                                | action                                                                             |
 | ------------------- | ---------- | ----------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------- |
 | Bell                | `▁▂▅█▅▂▁`  | symmetric, normal-ish                           | adult heights                                   | nothing                                                                            |
@@ -169,7 +177,7 @@ ratio = r.std() / (r.max() - r.min())
 | Left skew           | `▁▁▁▂▃▅█▂` | long left tail                                  | easy-exam scores                                | square / YJ for linear                                                             |
 | Uniform / flat      | `▅▅▅▅▅▅▅`  | every value about equally common                | lottery digits; synthetic Kaggle features       | nothing — perfectly fine; **NOT droppable**                                        |
 | Bimodal (two humps) | `▂█▂▁▂█▂`  | two hidden groups mixed together                | heights of men+women combined                   | find the column that separates the humps (Step 5/6); consider a "which group" flag |
-| Spike + tail        | `█▂▁▂▂▁▁`  | one special value (often 0) plus a distribution | yearly medical spend (many people spend 0)      | add binary `is_zero` feature; log1p the rest                                       |
+| **Spike + tail**    | `█▂▁▂▂▁▁`  | one special value (often 0) plus a distribution | yearly medical spend (many people spend 0)      | **add binary `is_zero` feature; log1p the rest**                                   |
 | Comb / gaps         | `█▁█▁█▁█`  | only certain values occur                       | anything rounded or coded                       | it's discrete in disguise → reroute to §5.2                                        |
 | Wall at an edge     | `█▅▃▂▁`    | values piled against a hard floor/cap           | percentages at 0 or 100; sensor maxed out       | note the bound; it's a property, not an error                                      |
 | Isolated island     | `▅█▅▁▁▁▁▂` | main mass + a small far-away cluster            | heights: 170-ish cm plus a clump at 5.9 (feet!) | investigate: unit error? special segment?                                          |
