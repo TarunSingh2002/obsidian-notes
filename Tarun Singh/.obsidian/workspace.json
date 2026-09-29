@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "fda53e5fe9d43d21",
+        "id": "1c99d65c1fe59a4b",
         "type": "tabs",
         "children": [
           {
-            "id": "284e502d55bbc7bb",
+            "id": "13ec079661c8dd56",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -55,7 +55,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "tag:#Col",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -76,11 +76,13 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
-    "width": 324.5
+    "width": 324.5,
+    "collapsed": true
   },
   "right": {
     "id": "eeaa25e87f210d6a",
@@ -186,10 +188,12 @@
       "bases:Create new base": false
     }
   },
-  "active": "284e502d55bbc7bb",
+  "active": "13ec079661c8dd56",
   "lastOpenFiles": [
     "Machine Learning/EDA/EDA_Draft1.md",
     "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
+    "Attachments/Pasted image 20260928124818.png",
+    "Attachments/Pasted image 20260928124807.png",
     "Machine Learning/Theory/HyperParamterTunning.md",
     "Machine Learning/Cheat-Sheet/CheatSheet of Machine Learning.md",
     "Machine Learning/EDA/EDA_Draft2.md",
@@ -218,7 +222,6 @@
     "AWS/Amazon EC2.md",
     "AWS/AWS Basis.md",
     "AWS/Billing And Cost Management.md",
-    "AWS/IAM.md",
     "Attachments/Pasted image 20260720025005.png",
     "Attachments/Pasted image 20260720024829.png",
     "Attachments/Pasted image 20260717010755.png",
@@ -227,8 +230,6 @@
     "Attachments/Pasted image 20260709004216.png",
     "Attachments/Pasted image 20260709004135.png",
     "Attachments/Pasted image 20260627180111.png",
-    "Attachments/Pasted image 20260627175752.png",
-    "Attachments/Pasted image 20260627175002.png",
     "AWS",
     "AI-Engineer/LangGraph",
     "AI-Engineer",

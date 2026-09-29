@@ -210,13 +210,266 @@ stats.probplot(X_train[col], dist="norm", plot=plt); plt.show()
 
 #### Step 2 Bivariate - every feature vs the TARGET
 - This is where two things get decided: **which features matter**, and **which model family to expect to win**.
-##### Number column vs numeric target
-##### Discrete Number / categorical feature × continuous target
+- what bivariate tells you about model choice
+	- Mostly **straight lines / clean level-shifts** → expect **linear models** (Linear/Ridge/Logistic) to do well → keep them, they're fast and interpretable.
+	- **Steps, curves, U-shapes, threshold effects** → expect **tree ensembles** (RandomForest, XGBoost) to win — they carve thresholds natively.
+##### Continuous Number Feature vs Continuous Numeric Target
+
+##### Discrete Number / Categorical / Binary Feature vs Continuous Numeric Target
 - **What we are doing (one line):** check — do the groups have **different target averages**?. Different target averages→ the column helps predict. Same target averages→ it doesn't. 
+##### Continuous Number Feature vs Categorical Target
+```python
+base = (y_train == 'Yes').mean()
+for i in discrete_numerical:
+    # 1. first look: one curve per class
+    sns.kdeplot(x=X_train[i], hue=y_train, common_norm=False, cut=0); plt.show()
+    # 2. cut into 10 equal-size groups, then the SAME lift table as categorical
+    bins = pd.qcut(X_train[i], q=10, duplicates='drop')
+    ct = pd.crosstab(bins, y_train, normalize='index')
+    ct['count'] = bins.value_counts()
+    ct['count_percentage'] = ct['count'] / len(X_train)
+    ct['lift'] = ct['Yes'] / base
+    print(ct.round(3))
+    big = ct.loc[ct['count_percentage'] >= 0.01, 'lift']
+    spread = big.max() - big.min()
+    verdict = 'STRONG' if spread > 0.5 else 'MILD' if spread >= 0.1 else 'WEAK'
+    print(f"{i}: lift spread = {spread:.2f} → {verdict}")
+    ax = ct['lift'].plot(kind='bar', title=i)
+    ax.axhline(1, ls='--', color='red')
+    plt.show()
+    print("=" * 100)
+```
+
+- **Reading KDE = separation.** The further apart the per-class curves/boxes sit, the more this feature alone can tell the classes apart. Fully overlapping → weak alone (it might still help in combination — trees find combinations). One class's curve showing two humps → a hidden subgroup inside that class.
+- **The lift table** is where you make the decision. One sudden change, flat on both sides-> then make the flag for that change.
+
+##### Discrete Number / Categorical / Binary Feature  vs Categorical Target
+
+```python
+base = (y_train == 'Yes').mean()     # here Yes is a category in target column
+
+for i in normial_categorical + ordinal_categorical + binary_columns:
+    ct = pd.crosstab(X_train[i], y_train, normalize='index')
+    ct['count'] = X_train[i].value_counts()
+    ct['count_percentage'] = ct['count'] / len(X_train)
+    ct['lift'] = ct['Yes'] / base
+    print(ct.round(3))
+    big = ct.loc[ct['count_percentage'] >= 0.01, 'lift']         # judge only on categories with >= 1% of rows
+    spread = big.max() - big.min()
+    verdict = 'STRONG' if spread > 0.5 else 'MILD' if spread >= 0.1 else 'WEAK'
+    print(f"{i}: lift spread = {spread:.2f} → {verdict}")
+    ax = ct['lift'].plot(kind='bar', title=i)
+    ax.axhline(1, ls='--', color='red')               # red line = the average person
+    plt.show()
+    print("=" * 100)
+```
+- Lift
+	- lift = the category's Yes rate ÷ everyone's Yes rate
+	- **how many times more likely than average**.
+	- **1.0** means this group buys like everyone else.
+	- **2.0** means twice as likely to buy.
+	- **0.5** means half as likely.
+- **Step 1: Ignore categories under 1% of rows** when judging. Keep them in the data.
+- **Step 2: Is the column useful?** All lifts ≈ 1 means it's weak. Lifts far from 1 on either side mean it's useful.
+- **Step 3: Action by column type:**
+
+| Column type | What you see                          | Action                                                                               |
+| ----------- | ------------------------------------- | ------------------------------------------------------------------------------------ |
+| Any         | All lifts ≈ 1                         | Weak. Do nothing now; drop candidate after modeling. (A flag you created: drop now.) |
+| Binary      | Lifts far from 1                      | Map to 0/1. Done                                                                     |
+| Nominal     | Some lifts far from 1                 | One-hot. Done                                                                        |
+| Ordinal     | Steady climb or steady fall           | Do nothing, ordinal encoding covers it                                               |
+| Ordinal     | One sudden change, flat on both sides | Keep the number and add a flag at the change                                         |
+| Ordinal     | Goes up then down (or down then up)   | Linear models: one-hot. Trees: keep as number                                        |
 
 
 
 #### Step 2 Multivariate
+##### Twin columns (Question 1: "Do I have twin columns?)
+```python
+num_cols = ['feature1', 'feature2']
+corr = X_train[num_cols].corr()          # add method='spearman' for the rank version
+plt.figure(figsize=(9, 7))
+sns.heatmap(corr, annot=True, fmt='.2f', cmap='coolwarm', center=0, vmin=-1, vmax=1)
+plt.show()
+```
+
+- **|corr| > ~0.9 between two FEATURES** = they carry the same information (e.g. `area_sqft` and `num_rooms`). Drop any one of them
+- Correlation value can go from -1 to 1
+- Applied between 2 numerical columns.
+
+##### Teaming up (Question 2: "Do two features team up?)
+
+- **Teaming up, in plain words:** the effect of feature A on the target depends on the value of feature B. Each feature alone doesn't tell the full story; the combination does.
+- **Examples:**
+	- Smoking raises insurance charges a little for young people, and enormously for old people.
+	- Driving at night raises crash risk a little at low speed, and a lot at high speed.
+- **Do I even need this?** Only for linear models (linear / logistic regression). Tree models (Random Forest, XGBoost, LightGBM) and neural nets find team-ups by themselves → for them this section is optional.
+
+###### Step 0: The target as a number `t`
+
+| Target type                       | What to write                                                                          | Scale used in Step 2 |
+| --------------------------------- | -------------------------------------------------------------------------------------- | -------------------- |
+| Number (regression)               | `t = y_train`                                                                          | ÷ target's std       |
+| 2 classes (Yes/No)                | `t = (y_train == 'Yes').astype(int)`                                                   | log-odds             |
+| Ordered classes (Low/Medium/High) | map to numbers (0, 1, 2), then treat as a number target                                | ÷ target's std       |
+| 3+ classes                        | `t = (y_train == 'ClassName').astype(int)`, run Step 2–3 once per class you care about | log-odds             |
+
+```python
+t = (y_train == 'Yes').astype(int)   # change this line for your target (table above)
+number_target = False                 # True if t is a number (regression / ordered classes)
+```
+- Number target that is skewed (prices, income) and you will log it for modeling → use `t = np.log1p(y_train)` here too.
+
+###### Step 1: Turn every feature into a few groups (do once)
+
+| Feature type                                     | Becomes                    |
+| ------------------------------------------------ | -------------------------- |
+| Binary, nominal, ordinal, discrete (≤ 10 values) | as is                      |
+| Continuous, or discrete with > 10 values         | 5 equal-size groups (qcut) |
+| Text with > 10 categories                        | top 8 categories + 'Other' |
+
+```python
+#Col must have ORIGINAL features only (not flags / columns you made from them)
+cols = [...]
+
+G = pd.DataFrame(index=X_train.index)
+for col in cols:
+    s = X_train[col]
+    if s.nunique() <= 10:
+        G[col] = s                                        # few values: as is
+    elif pd.api.types.is_numeric_dtype(s):
+        G[col] = pd.qcut(s, q=5, duplicates='drop')       # many numbers: 5 equal-size groups
+    else:
+        top = s.value_counts().index[:8]
+        G[col] = s.where(s.isin(top), 'Other')            # many text categories: top 8 + 'Other'
+        
+""" 
+X_train_copy=X_train.copy()
+for i in discrete_numerical:
+    s=X_train_copy[i]
+    X_train_copy[i] = pd.qcut(s, q=10, duplicates='drop')
+"""
+```
+- Original features only: a column made from another (flag, ratio) always "teams up" with its parent and wastes a top spot.
+- Ordinal TEXT with > 10 levels → map it to numbers first, so it gets cut in order.
+- Small data (under ~5,000 rows) → use `q=3` so the cells aren't too small.
+- Many features (more than ~15) → put only your top ~10 from bivariate in `cols`.
+- Rows with a missing value in either feature are skipped.
+###### Step 2: Make the table for that pair
+
+- Original features only, not a flag made from one of them (a flag made from income, paired with income itself, gives impossible boxes).
+
+```python
+a, b = 'feature_A', 'feature_B'      # A = one line per group, B = x-axis
+
+table = t.groupby([X_train_copy[a], X_train_copy[b]], observed=True).mean().unstack()
+
+count_percentage = t.groupby([G[a], G[b]], observed=True).size().unstack() / len(t)
+print(table.round(3))
+print(count_percentage.round(3))
+
+
+plot_table = table.T
+plot_table.index = plot_table.index.astype(str)                   # readable x-axis labels
+plot_table.plot(marker='o'); plt.ylabel('average target'); plt.title(f'{a} x {b}'); plt.show()
+
+""" 
+col=["" ... ""]
+n=len(col)
+
+for i in range(n-1):
+    for j in range(i+1,n):
+        column_value=col[i]
+        row_value=col[j]
+        if X_train_copy[column_value].nunique() > X_train_copy[row_value].nunique():
+            temp=column_value
+            column_value=row_value
+            row_value=temp
+        table=t.groupby([X_train_copy[row_value],X_train_copy[column_value]], observed=True).mean().unstack()
+        count_percentage = t.groupby([X_train_copy[row_value], X_train_copy[column_value]], observed=True).size().unstack().mul(100) / len(t)
+        print(table.round(3))
+        print(count_percentage.round(3))
+        print("="*50)
+"""
+```
+- Each box = rows that are in group X of A AND group Y of B.
+- The plot draws one line per group of A.
+- Put the feature with fewer groups as A (fewer lines, easier to read).
+
+###### Step 3: How to read it
+
+One method for every target. The only thing that depends on the target is HOW you measure a line's change (3b).
+
+**3a. Counts first.**
+- Ignore boxes under 1% of rows (count_percentage < 0.01). Too few to trust.
+- Many empty / tiny boxes in a pattern (a group of A only shows up with a few groups of B)
+  → A and B are LINKED. You can't read a team-up there. Note "A and B are linked" and move on.
+
+**3b. Measure each line's change.**
+Pick two points on the x-axis and use the SAME two for every line:
+- If the lines behave differently in one part of the x-axis, measure around that part.
+- If nothing stands out, use the first and last box that pass the count check.
+- Small zigzags in between are noise.
+
+For each line, write down its DIRECTION (up / down / flat) and its SIZE:
+
+| Target (from Step 0)                             | Size of the change                                                             |
+| ------------------------------------------------ | ------------------------------------------------------------------------------ |
+| Number (also ordered classes mapped to numbers)  | end − start, ignoring the sign                                                 |
+| Rate (Yes/No, or one class of a 3+ class target) | odds = rate ÷ (1 − rate) at both points; size = (bigger odds ÷ smaller odds) − 1 |
+
+- Rate example: 10% → 15% → odds 0.111 → 0.176 → 0.176 ÷ 0.111 = 1.59 → size 0.59, up.
+- Why odds for rates: a rate is stuck between 0% and 100%, so the same real effect looks tiny near 0%
+  and big near 50%. Odds fix that. So for rate targets, trust these numbers over how the plot looks.
+- A box shows 0 → print more decimals (`.round(4)`); if it's truly ~0, measure from the next box.
+
+**3c. Decide.**
+
+| What you find                                                     | Verdict        | Plot usually looks like                   |
+| ----------------------------------------------------------------- | -------------- | ----------------------------------------- |
+| Lines go in opposite directions (one up, one down)                | STRONG TEAM-UP | Lines cross / go opposite ways            |
+| Same direction, sizes close (smaller ≥ ~¾ of bigger)              | NO TEAM-UP     | Parallel lines (one may just sit higher)  |
+| Sizes clearly different (smaller < ~¾ of bigger), or one line flat | TEAM-UP        | Lines spread apart                        |
+
+- Exception: the gap between the two sizes is tiny → NO TEAM-UP.
+  Tiny = under ~0.2 for a rate target, under ~10% of the target's std for a number target.
+- One line sitting higher is NOT a team-up. That's A's own effect (you saw it in bivariate).
+- All lines about flat → B does nothing here → NO TEAM-UP.
+- Rough starting points, not laws.
+
+Examples:
+- Number: +11 and +11 → NO TEAM-UP. +11 and +42 → 11 ÷ 42 = 0.26 → TEAM-UP.
+- Rate: 2% → 4% (size 1.0) and 20% → 33% (size 0.97) → NO TEAM-UP,
+  even though the plot shows +2 vs +13 points.
+- Rate: 15% → 8% (size 1.0) and 21% → 16% (size 0.4) → TEAM-UP,
+  even though both lines drop 5–7 points on the plot.
+
+**3d. Shadow check.** Compare B's bivariate story with its story INSIDE each line.
+- Same inside every line → B's bivariate result is real.
+- Different inside the lines (flat, or the opposite direction) → B's bivariate result was partly
+  a SHADOW of A. Trust the inside-the-lines story and note it.
+
+**3e. Which combination.** The line that changes differently, and the x-range where it happens,
+is the combination to build (Step 5). Swapping A and B shows the same team-up from the other side.
+
+**3f. Write one line in your notes, for team-ups AND for no team-ups.**
+- `A × B = NO TEAM-UP (sizes 7.5 vs 8.8, same story)`
+- `A × B = TEAM-UP (A=No line up, size 0.8; A=Yes line flat → B matters only when A = No)`
+
+**3g. Action.**
+
+| Verdict        | Linear models (linear / logistic regression)   | Tree models |
+| -------------- | ---------------------------------------------- | ----------- |
+| NO TEAM-UP     | Nothing                                        | Nothing     |
+| TEAM-UP        | Build it (Step 5) if it makes real-world sense | Nothing     |
+| STRONG TEAM-UP | Build it (Step 5)                              | Nothing     |
+
+- Build the same column on the test set.
+- Then check the new column against the target (bivariate). WEAK → drop it.
+
+
+
 ### Feature Engineering
 #### Order Of Preprocessing
 
