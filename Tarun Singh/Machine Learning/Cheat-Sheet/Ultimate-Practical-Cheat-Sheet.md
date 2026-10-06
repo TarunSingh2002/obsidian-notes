@@ -1252,6 +1252,7 @@ adj_r2 = 1 - ((1-r2)*(n-1)/(n-p-1))
 	- AUC = area under it -> 1.0 = perfect, 0.5 = random guessing, <0.5 = worse than random
 	- Threshold independent -> tells how well the model **separates** the classes
 	- Needs `predict_proba()` not `predict()`
+	- roc_auc_score = max 1 , need to be higher
 	- For heavily imbalanced data prefer **Precision-Recall AUC** over ROC-AUC
 ```Python
 # binary class classification

@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "b683d50da7de02f3",
+        "id": "7d441dd9a71deeb4",
         "type": "tabs",
         "children": [
           {
-            "id": "c18be0733ee5e4f8",
+            "id": "6095ab142727c575",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -80,7 +80,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 324.5
+    "width": 324.5,
+    "collapsed": true
   },
   "right": {
     "id": "eeaa25e87f210d6a",
@@ -186,26 +187,26 @@
       "bases:Create new base": false
     }
   },
-  "active": "c18be0733ee5e4f8",
+  "active": "6095ab142727c575",
   "lastOpenFiles": [
-    "2026-05-12.md",
-    "2026-09-29.md",
-    "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
-    "Machine Learning/EDA/EDA_Draft1.md",
-    "Attachments/Pasted image 20260928124818.png",
-    "Attachments/Pasted image 20260928124807.png",
+    "Deep Learning/CheatSheet-PyTorch.md",
     "Machine Learning/Theory/HyperParamterTunning.md",
-    "Machine Learning/Cheat-Sheet/CheatSheet of Machine Learning.md",
-    "Machine Learning/EDA/EDA_Draft2.md",
-    "Machine Learning/Theory/Basics of Machine Learning.md",
-    "Machine Learning/Cheat-Sheet",
+    "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
     "Machine Learning/Theory/Matrics.md",
     "Machine Learning/Theory/Feature Engineering.md",
+    "Machine Learning/Theory/Basics of Machine Learning.md",
+    "Deep Learning/CheatSheet-Tensorflow.md",
+    "Machine Learning/EDA/EDA_Draft1.md",
+    "2026-05-12.md",
+    "2026-09-29.md",
+    "Attachments/Pasted image 20260928124818.png",
+    "Attachments/Pasted image 20260928124807.png",
+    "Machine Learning/Cheat-Sheet/CheatSheet of Machine Learning.md",
+    "Machine Learning/EDA/EDA_Draft2.md",
+    "Machine Learning/Cheat-Sheet",
     "Machine Learning/Theory",
     "Machine Learning/EDA",
     "Deep Learning",
-    "Deep Learning/CheatSheet-PyTorch.md",
-    "Deep Learning/CheatSheet-Tensorflow.md",
     "CheatSheet-Tensorflow",
     "Machine Learning/Theory/Algos/Decision Tree.md",
     "Machine Learning/Theory/Algos/Ensemble Learning.md",

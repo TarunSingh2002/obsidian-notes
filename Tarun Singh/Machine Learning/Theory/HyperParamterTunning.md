@@ -34,7 +34,9 @@ tags:
 
 import optuna
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+
+folds = StratifiedKFold(n_splits=3, shuffle=True, random_state=42) # same folds for every trial
 
 # Define the objective function
 def objective(trial):
@@ -48,15 +50,15 @@ def objective(trial):
 	random_state=42
 	)
 	# Perform 3-fold cross-validation and calculate accuracy
-	score = cross_val_score(model, X_train, y_train, cv=3, scoring='accuracy').mean()
+	score = cross_val_score(model, X_train, y_train, cv=folds, scoring='accuracy').mean()
 	return score # Return the accuracy score for Optuna to maximize
 	
 	
 # Create a study object and optimize the objective function
 
-study = optuna.create_study(direction='maximize', sampler=optuna.samplers.TPESampler()) # We aim to maximize accuracy
+study = optuna.create_study(direction='maximize', sampler=optuna.samplers.TPESampler(seed=42)) # We aim to maximize accuracy
 
-study.optimize(objective, n_trials=50) # Run 50 trials to find the best hyperparameters
+study.optimize(objective, n_trials=50,timeout=3 * 60 * 60) # stops at 50 trials or 3 hours, whichever first
 
 print(f'Best trial accuracy: {study.best_trial.value}')
 print(f'Best hyperparameters: {study.best_trial.params}')
