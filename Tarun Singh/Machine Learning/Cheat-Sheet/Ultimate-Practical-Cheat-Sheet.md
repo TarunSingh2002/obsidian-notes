@@ -59,27 +59,264 @@ Divide the columns in their type -> Continuous numeric, Discrete numeric, Ordina
 	- `print(y_train.value_counts(normalize=True)); sns.countplot(x=y_train); plt.show()`
 	- Multiclass classification with imbalance: print the share of _every_ class; classes with a handful of rows can't be learned — consider merging them or accept poor performance there.
 #### Step 2 Univariate
+##### For columns with missing value
 
-##### For columns with missing value 
-
-**Q1 — Where is it missing?** Is missingness concentrated in some group?
-
-```python
-# does missingness in 'salary' depend on another column, e.g. job type?
-print(X_train.groupby('job_type')['salary'].apply(lambda s: s.isnull().mean()))
-```
-
-If yes (e.g. salary missing mostly for 'freelancer') → the holes are not random; imputing with one global median is crude — group-wise thinking, or at least an indicator, is warranted.
-
-**Q2 — Does the HOLE itself carry signal?** The most valuable check. Plain question: _do rows with a hole behave differently on the target?_
+**The one idea:** turn the hole into a True/False column, then everything is "compare a True/False column with something else" (piles → average → lift). Same machinery as every other section.
 
 ```python
-for c in X_train.columns[X_train.isnull().any()]:
-    print(c)
-    print(df_tr.groupby(X_train[c].isnull())[TARGET].agg(['mean', 'count']), "\n")
+c = 'salary'                    # ← name of ONE column that has holes (you set this)
+m = X_train[c].isnull()         # True = hole, False = filled
+overall = m.mean()              # overall missing rate (True counts as 1, False as 0)
 ```
 
-If the target mean clearly differs between has-hole and no-hole rows → the _fact of absence_ is information (people who hide their income are different from people who report it) → plan `SimpleImputer(add_indicator=True)` so the model receives that fact. If the means match → plain imputation loses nothing.
+First: **how much is missing?** → use the decision tree in "Handling Missing values" (<5% / 5–40% / >40%). If the column is worth keeping, ask 3 questions:
+
+|#|Question|What decides the code|
+|---|---|---|
+|1|What do the **filled** values look like?|type of the **hole column** (numeric / categorical)|
+|2|Are the holes **piled up in one group**?|type of the **other feature** (categorical / numeric)|
+|3|Does **having a hole** change the target?|type of the **target** (numeric / categorical)|
+
+Words used below:
+
+|word|meaning|
+|---|---|
+|pile|one group of rows (one category, one age range, hole vs no-hole)|
+|missing_rate|% of holes inside a pile|
+|lift|pile's rate ÷ overall rate. 1 = average, 2 = twice as many, 0.5 = half|
+|spread|highest lift − lowest lift. Big = the piles really differ|
+
+---
+
+###### 1. Look at the filled values _(why: to choose the filler)_
+
+**1A. Hole column is NUMERIC**
+
+```python
+c = 'salary'
+s = X_train[c]
+print(s.describe())                                   # 'count' = filled rows only
+print("skew:", s.skew(), "| kurt:", s.kurt())          # pandas skips NaN by itself
+sns.histplot(s.dropna(), kde=True); plt.show()
+sns.boxplot(x=s.dropna()); plt.show()
+stats.probplot(s.dropna(), dist="norm", plot=plt); plt.show()   # scipy does NOT skip NaN → needs .dropna()
+```
+
+|You see|Meaning|Filler|
+|---|---|---|
+|skew within ±1, few fliers|roughly symmetric|median (safe default; mean also OK)|
+|skew > +1 or < −1, or many fliers|skew / outliers pull the mean|**median**, not mean|
+|big spike at one value|many rows share one value (0? a default?)|median, but check parts 2–3: the hole may mean something|
+
+**1B. Hole column is CATEGORICAL**
+
+```python
+c = 'education'
+s = X_train[c]
+print(s.value_counts(dropna=False, normalize=True))   # NaN shows up as its own row
+print(s.nunique(), s.nunique(dropna=False))           # without / with the hole counted
+```
+
+|You see|Meaning|Filler|
+|---|---|---|
+|one category clearly dominates (say > 60%)|the mode is a safe guess|`most_frequent`|
+|categories are close to each other|mode would be nearly a coin flip|constant `'Missing'`|
+|the NaN row is big, or absence could mean something ("no phone")|the hole is information|constant `'Missing'` (+ check part 3)|
+|many tiny categories|noisy|merge rare labels first|
+
+- Caveat for both: this only describes the rows that **reported**. If the holes are not random (parts 2–3), the true column looks different.
+
+---
+
+###### 2. Where are the holes? _(are they piled up in one group of another column?)_
+
+Recipe: make piles from the **other** column → missing_rate per pile → lift → spread. Other column categorical → use it as piles directly. Other column numeric → `qcut` it into piles first.
+
+**2A. Other column is CATEGORICAL / BINARY**
+
+```python
+c = 'salary'; o = 'job_type'                 # ← hole column, other column
+m = X_train[c].isnull(); overall = m.mean()
+
+tab = m.groupby(X_train[o]).agg(missing_rate='mean', rows='count')   # one pile per category
+tab['share_of_rows'] = tab['rows'] / len(m)
+tab['lift'] = tab['missing_rate'] / overall
+print(tab.round(3))
+
+big = tab.loc[tab['share_of_rows'] >= 0.01, 'lift']                  # ignore piles < 1% of rows
+print("spread =", round(big.max() - big.min(), 2))
+```
+
+**2B. Other column is NUMERIC**
+
+```python
+c = 'salary'; o = 'age'                      # ← hole column, other column
+m = X_train[c].isnull(); overall = m.mean()
+
+piles = pd.qcut(X_train[o], q=5, duplicates='drop')   # 5 equal-size piles (q=3 if the data is small)
+tab = m.groupby(piles, observed=True).agg(missing_rate='mean', rows='count')
+tab['share_of_rows'] = tab['rows'] / len(m)
+tab['lift'] = tab['missing_rate'] / overall
+print(tab.round(3))
+
+big = tab.loc[tab['share_of_rows'] >= 0.01, 'lift']
+print("spread =", round(big.max() - big.min(), 2))
+```
+
+**How to read (2A and 2B)**
+
+|You see|Meaning|Action|
+|---|---|---|
+|one pile's lift far from 1 (e.g. freelancer 2.7, others 0.25), spread > 0.5|holes **piled up** there → not random|one global median is crude: think group-wise, or at least add an indicator|
+|all lifts ≈ 1 (spread < 0.1)|holes spread evenly|plain impute|
+|_(numeric o)_ lifts climb or fall steadily across piles|holes depend on that number|real pattern|
+|_(numeric o)_ lifts zigzag, no direction|wobble|ignore|
+|spread looks big, but a pile has only a handful of holes|**may be pure luck**|run the luck check below|
+
+Labels from your lift tables: spread > 0.5 STRONG, 0.1–0.5 MILD, < 0.1 WEAK. On small data treat them as a **first look only**.
+
+**Luck check** (do this when piles are small): put the _same number of holes_ on random rows, measure the spread, repeat 500×. This shows how big a spread luck alone can make.
+
+```python
+def spread_of(flag, key):                                  # lift spread of a True/False flag across piles
+    r = flag.groupby(key, observed=True).mean() / flag.mean()
+    return r.max() - r.min()
+
+key = X_train[o]                                           # for 2B use: key = piles
+real = spread_of(m, key)
+luck = []
+for _ in range(500):
+    fake = pd.Series(np.random.permutation(m.values), index=m.index)   # same holes, random rows
+    luck.append(spread_of(fake, key))
+print(f"real spread {real:.2f} | luck stays under {np.percentile(luck, 95):.2f} (95% of the time)")
+```
+
+|You see|Meaning|
+|---|---|
+|real spread **far above** luck's 95% line|real pattern|
+|real spread **inside** luck's range|probably luck, treat the holes as random|
+
+---
+
+###### 3. Does the hole carry signal? _(do rows WITH a hole behave differently on the target?)_
+
+Recipe: use `m` as the key, so there are exactly 2 piles (hole / no hole), and compare the **target** between them.
+
+**3A. Target is NUMERIC**
+
+```python
+c = 'salary'
+m = X_train[c].isnull()
+
+g = y_train.groupby(m).agg(avg='mean', median='median', std='std', rows='count')
+print(g.round(2))
+gap = abs(g.loc[True, 'avg'] - g.loc[False, 'avg'])
+print("gap in target-std units:", round(gap / y_train.std(), 2))
+```
+
+**3B. Target is CATEGORICAL** (multi-class: change `'Yes'`, run once per class)
+
+```python
+c = 'salary'
+m = X_train[c].isnull()
+
+t = (y_train == 'Yes').astype(int); base = t.mean()          # target → 1/0, base = overall Yes rate
+g = t.groupby(m).agg(yes_rate='mean', rows='count')
+g['lift'] = g['yes_rate'] / base
+print(g.round(3))
+print("lift spread =", round(abs(g.loc[True, 'lift'] - g.loc[False, 'lift']), 2))
+```
+
+**How to read (3A and 3B)**
+
+|Target|You see|Meaning|Action|
+|---|---|---|---|
+|numeric|gap ≥ ~0.5 std _(rough)_ and hole pile has decent rows|the hole changes the target|`SimpleImputer(add_indicator=True)`|
+|numeric|gap < ~0.1 std|no signal|plain impute|
+|numeric|gap in between|unclear|decide with the luck check below|
+|categorical|hole-pile lift far from no-hole lift (spread > 0.5)|the hole changes the target|`add_indicator=True`|
+|categorical|both lifts ≈ 1 (spread < 0.1)|no signal|plain impute|
+|either|hole pile is tiny (< 1% of rows)|too few to judge|ignore|
+
+- Skewed numeric target → trust the median column, or use `np.log1p(y_train)`.
+- Example (fake data): salary → hole pile spends ~626 vs ~491 (gap 1.28 std), Yes-rate 49% vs 17% → **signal**. education → gap 0.24 std, Yes-rate 26% vs 24% → looks like nothing.
+
+**Luck check for part 3** (same idea: shuffle the holes, see how big a gap luck makes)
+
+```python
+def gap_of(flag, y):                                       # hole-pile vs no-hole-pile gap, in std units
+    avg = y.groupby(flag).mean()
+    return abs(avg[True] - avg[False]) / y.std()
+
+y = y_train                                                # categorical target: y = t  (the 1/0 version)
+real = gap_of(m, y)
+luck = []
+for _ in range(500):
+    fake = pd.Series(np.random.permutation(m.values), index=m.index)
+    luck.append(gap_of(fake, y))
+print(f"real gap {real:.2f} | luck stays under {np.percentile(luck, 95):.2f} (95% of the time)")
+```
+
+|You see|Meaning|
+|---|---|
+|real gap **far above** luck's 95% line|real signal → keep the indicator|
+|real gap **inside** luck's range|no evidence of signal → plain impute|
+
+**3C. Same answer inside your bivariate lift tables** (so the hole is not silently dropped)
+
+`crosstab` / `qcut` drop NaN rows silently. Give the hole its own pile called `'Missing'`. Then **its lift row IS the 3B answer**.
+
+```python
+t = (y_train == 'Yes').astype(int); base = t.mean()
+
+# categorical / binary feature
+i = 'education'
+f = X_train[i].fillna('Missing')                           # the hole gets a name
+ct = pd.crosstab(f, y_train, normalize='index')
+ct['rows'] = f.value_counts()
+ct['lift'] = ct['Yes'] / base
+print(ct.round(3))
+
+# numeric feature (after qcut)
+i = 'salary'
+bins = pd.qcut(X_train[i], q=5, duplicates='drop')
+bins = bins.cat.add_categories('Missing')                  # 1) allow a new pile called 'Missing'
+bins = bins.fillna('Missing')                              # 2) now NaN can be filled with it
+ct = pd.crosstab(bins, y_train, normalize='index')
+ct['rows'] = bins.value_counts()
+ct['lift'] = ct['Yes'] / base
+print(ct.round(3))
+```
+
+|You see|Meaning|
+|---|---|
+|`Missing` row's lift far from 1 and far from the other rows|the hole carries signal (same as 3B)|
+|`Missing` row looks like the other rows|no signal|
+
+---
+
+###### Decision (put parts 2 and 3 together)
+
+|2: piled up?|3: signal?|Action|
+|---|---|---|
+|No|No|Plain impute (median / mode). Nothing lost.|
+|No|Yes|Impute + `SimpleImputer(add_indicator=True)`|
+|Yes|No|Group-wise imputation, or at least think about it|
+|Yes|Yes|Indicator, **plus the shadow check** below|
+
+**Shadow check:** the holes are piled in one group, so maybe the "signal" is only that group behaving differently. Repeat part 3 **inside each pile** of the part-2 column (`groupby` with two keys).
+
+```python
+o = 'job_type'                                             # ← the column where holes were piled up in part 2
+y_train.groupby([X_train[o], m]).agg(avg='mean', rows='count').round(1)       # numeric target
+t.groupby([X_train[o], m]).agg(yes_rate='mean', rows='count').round(3)        # categorical target
+```
+
+|You see|Meaning|
+|---|---|
+|hole vs no-hole gap **survives inside** each pile|the signal is real|
+|gap **vanishes** inside the piles|it was only a shadow of that column; the model already gets that column|
+|a pile has only a few rows (say < 10)|don't trust that pile|
 ##### Categorical Columns and Binary Columns
 - Check the cardinality `X_train[col].nunique()`
 - Check the frequency `X_train[col].value_counts()` `sns.countplot(x=X_train[col])`

@@ -189,9 +189,11 @@
   },
   "active": "6095ab142727c575",
   "lastOpenFiles": [
+    "Machine Learning/Cheat-Sheet/Pandas-Cheat-Sheet.md",
+    "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
+    "Untitled",
     "Deep Learning/CheatSheet-PyTorch.md",
     "Machine Learning/Theory/HyperParamterTunning.md",
-    "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
     "Machine Learning/Theory/Matrics.md",
     "Machine Learning/Theory/Feature Engineering.md",
     "Machine Learning/Theory/Basics of Machine Learning.md",
@@ -221,7 +223,6 @@
     "MLOps/MLFlow.md",
     "MLOps/DVC.md",
     "AWS/Amazon EC2.md",
-    "AWS/AWS Basis.md",
     "Attachments/Pasted image 20260720025005.png",
     "Attachments/Pasted image 20260720024829.png",
     "Attachments/Pasted image 20260717010755.png",
@@ -234,7 +235,6 @@
     "AI-Engineer/LangGraph",
     "AI-Engineer",
     "AI Engineer",
-    "Machine Learning/Theory/Clustering",
     "Untitled.canvas"
   ]
 }
