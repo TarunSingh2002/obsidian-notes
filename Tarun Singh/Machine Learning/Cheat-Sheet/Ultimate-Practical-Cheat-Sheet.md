@@ -464,7 +464,7 @@ for i in discrete_numerical:
     bins = pd.qcut(X_train[i], q=10, duplicates='drop')
     ct = pd.crosstab(bins, y_train, normalize='index')
     ct['count'] = bins.value_counts()
-    ct['count_percentage'] = ct['count'] / len(X_train)
+    ct['count_percentage'] = (ct['count'] / len(X_train))*100
     ct['lift'] = ct['Yes'] / base
     print(ct.round(3))
     big = ct.loc[ct['count_percentage'] >= 0.01, 'lift']
@@ -488,7 +488,7 @@ base = (y_train == 'Yes').mean()     # here Yes is a category in target column
 for i in normial_categorical + ordinal_categorical + binary_columns:
     ct = pd.crosstab(X_train[i], y_train, normalize='index')
     ct['count'] = X_train[i].value_counts()
-    ct['count_percentage'] = ct['count'] / len(X_train)
+    ct['count_percentage'] = (ct['count'] / len(X_train))*100
     ct['lift'] = ct['Yes'] / base
     print(ct.round(3))
     big = ct.loc[ct['count_percentage'] >= 0.01, 'lift']         # judge only on categories with >= 1% of rows
@@ -836,17 +836,29 @@ lowerlimit=per25-1.5*iqr
 upperlimit=df['col1'].qunatile(0.99)
 lowerlimit=df['col1'].qunatile(0.1)
 
-from sklearn.preprocessing import FunctionTransformer
-def iqr_clip(X):
-    X = pd.DataFrame(X)
-    for c in X.columns:
-        q1, q3 = X[c].quantile(0.25), X[c].quantile(0.75)
-        iqr = q3 - q1
-        lo, hi = q1 - 1.5*iqr, q3 + 1.5*iqr
-        X[c] = X[c].clip(lo, hi)
-    return X.values
 
-outlier_capper = FunctionTransformer(iqr_clip)   # drop this into your ColumnTransformer
+from sklearn.base import BaseEstimator, TransformerMixin
+import numpy as np, pandas as pd
+
+class ZScoreCapper(BaseEstimator, TransformerMixin):
+	"""Cap at mean ± factor*std. Limits LEARNT in fit() from train only."""
+	def __init__(self, factor=3.0):
+		self.factor = factor
+		
+	def fit(self, X, y=None):
+		X = pd.DataFrame(X).astype(float)
+		self.columns_ = X.columns
+		mean, std = X.mean(), X.std()
+		self.lower_ = (mean - self.factor * std).to_numpy() # <- stored
+		self.upper_ = (mean + self.factor * std).to_numpy()
+		return self
+	
+	def transform(self, X):
+		X = pd.DataFrame(X).astype(float)
+		return X.clip(self.lower_, self.upper_, axis=1) # <- reused
+	
+	def get_feature_names_out(self, input_features=None):
+		return np.asarray(self.columns_, dtype=object)
 ```
 
 
@@ -1139,6 +1151,7 @@ time['time'] = time['date'].dt.time
 #### Making your own column transformer
 
 ```python 
+
 from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
 
@@ -1167,6 +1180,23 @@ pipeline = Pipeline(steps=[
     ("model", SomeModel()),
 ])
 
+------------------------------------------------------------------------------
+
+class MakingCustomFeatures(BaseEstimator, TransformerMixin):
+    def fit(self,X,y=None):
+        return self
+    def transform(self, X):
+        X = X.copy()
+        X['flag1'] = np.where()
+        X['flag2'] = np.where()
+        return X[['flag1','flag2']]
+makingCustomFeatures = MakingCustomFeatures()
+
+transformers=[(
+            'creating_new_flags',
+            makingCustomFeatures,
+            ['only_flag_feature1', 'only_flag_feature2']
+        )]
 ```
 
 ### Hyper parameter tunning

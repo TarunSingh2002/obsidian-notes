@@ -51,21 +51,21 @@ torch.tensor([[1,2,3],[4,5,6]], requires_grad=True)
 
 ### DataTypes
 
-| Data Type | Dtype | When it is used |
-| --------- | ----- | --------------- |
-| 32-bit Floating Point | `torch.float32` | **the standard for deep learning** — best balance of precision and memory |
-| 64-bit Floating Point | `torch.float64` | double precision. High-precision numerical tasks, but more memory |
-| 16-bit Floating Point | `torch.float16` | half precision. **Mixed-precision training** to cut memory/compute on modern GPUs |
-| BFloat16 | `torch.bfloat16` | brain float. Reduced precision vs float16, used in mixed precision especially on TPUs |
-| 8-bit Floating Point | `torch.float8` | ultra low precision, experimental / extreme memory constraints |
-| 8-bit Integer | `torch.int8` | **quantized models** — save memory and compute at inference |
-| 16-bit Integer | `torch.int16` | special numerical tasks needing intermediate precision |
-| 32-bit Integer | `torch.int32` | standard signed integer, indexing and general purpose |
-| 64-bit Integer | `torch.int64` (long) | large indexing arrays. **Class labels for CrossEntropyLoss must be this** |
-| 8-bit Unsigned Integer | `torch.uint8` | **image data** (pixel values 0-255) |
-| Boolean | `torch.bool` | masks in logical operations |
-| Complex 64 / 128 | `torch.complex64/128` | scientific and signal processing |
-| Quantized int/uint 8 | `torch.qint8` / `torch.quint8` | quantized models for efficient inference |
+| Data Type              | Dtype                          | When it is used                                                                       |
+| ---------------------- | ------------------------------ | ------------------------------------------------------------------------------------- |
+| 32-bit Floating Point  | `torch.float32`                | **the standard for deep learning** — best balance of precision and memory             |
+| 64-bit Floating Point  | `torch.float64`                | double precision. High-precision numerical tasks, but more memory                     |
+| 16-bit Floating Point  | `torch.float16`                | half precision. **Mixed-precision training** to cut memory/compute on modern GPUs     |
+| BFloat16               | `torch.bfloat16`               | brain float. Reduced precision vs float16, used in mixed precision especially on TPUs |
+| 8-bit Floating Point   | `torch.float8`                 | ultra low precision, experimental / extreme memory constraints                        |
+| 8-bit Integer          | `torch.int8`                   | **quantized models** — save memory and compute at inference                           |
+| 16-bit Integer         | `torch.int16`                  | special numerical tasks needing intermediate precision                                |
+| 32-bit Integer         | `torch.int32`                  | standard signed integer, indexing and general purpose                                 |
+| 64-bit Integer         | `torch.int64` (long)           | large indexing arrays. **Class labels for CrossEntropyLoss must be this**             |
+| 8-bit Unsigned Integer | `torch.uint8`                  | **image data** (pixel values 0-255)                                                   |
+| Boolean                | `torch.bool`                   | masks in logical operations                                                           |
+| Complex 64 / 128       | `torch.complex64/128`          | scientific and signal processing                                                      |
+| Quantized int/uint 8   | `torch.qint8` / `torch.quint8` | quantized models for efficient inference                                              |
 
 > [!warning] float32 is the default you want
 > `torch.tensor(numpy_float_array)` gives you **float64**, but `nn` layers are float32 -> `RuntimeError: expected scalar type Float but found Double`.
