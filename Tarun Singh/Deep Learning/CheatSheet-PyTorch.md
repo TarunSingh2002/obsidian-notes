@@ -8,13 +8,13 @@ tags:
 
 - Types of tensor based on dimensions
 
-| Name | Dim | Example |
-| ---- | --- | ------- |
-| scalar | 0 D | `torch.tensor(4.0)` |
-| vector | 1 D | `torch.tensor([1,2,3])` |
-| matrix | 2 D | `torch.tensor([[1,2,3],[4,5,6]])` |
-| 3 D tensor | 3 D | image (H, W, channels) |
-| ... n D tensor | n D | batch of images (N, C, H, W) |
+| Name           | Dim | Example                           |
+| -------------- | --- | --------------------------------- |
+| scalar         | 0 D | `torch.tensor(4.0)`               |
+| vector         | 1 D | `torch.tensor([1,2,3])`           |
+| matrix         | 2 D | `torch.tensor([[1,2,3],[4,5,6]])` |
+| 3 D tensor     | 3 D | image (H, W, channels)            |
+| ... n D tensor | n D | batch of images (N, C, H, W)      |
 
 ### Creating a tensor
 ```python
@@ -181,7 +181,7 @@ a.unsqueeze(0)      # ADD a dimension of size 1 at position 0 -> (5,) becomes (1
 ```
 - `unsqueeze(0)` is what you use to add the **batch dimension** for a single sample before `model(x)`
 
-## NumPy ↔ Tensor
+## NumPy ↔ Tensor and CSV file  -> Tensor
 ```python
 # numpy array  ->  tensor
 a = np.array([1,2,3])
@@ -193,6 +193,10 @@ a = torch.tensor([1,2,3,4])
 b = a.numpy()                              # SHARES memory
 b = a.detach().cpu().numpy()               # what you actually need if a is on GPU
                                            # and/or part of a computation graph
+# CSV to Tensor
+x_train = pd.read_csv(x_train_path, header=None)
+x_train_tensor = torch.from_numpy(x_train.to_numpy(dtype=np.float32))
+
 ```
 > [!warning] `from_numpy` / `.numpy()` share memory
 > They do **not** copy. Editing the numpy array edits the tensor and vice versa. If you want a real copy use `torch.tensor(...)` (which copies) or `.clone()`.
@@ -459,11 +463,16 @@ class Model(nn.Module):
         super().__init__()                    # invoke the nn.Module constructor
         self.linear_layer_1 = nn.Linear(x, 1)
         self.sigmoid = nn.Sigmoid()
-
+    
     def forward(self, x):
         z = self.linear_layer_1(x)            # wx+b
         return self.sigmoid(z)
-
+    
+	def calculate_loss(self, y_pred, y):           # binary cross entropy, by hand
+        epsilon = 1e-7
+        y_pred = torch.clamp(y_pred, epsilon, 1 - epsilon)   
+        return -(y*torch.log(y_pred) + (1-y)*torch.log(1-y_pred)).mean()
+        
 model = Model(x_train_tensor.shape[1])
 
 for i in range(epochs):
@@ -500,7 +509,7 @@ for i in range(epochs):
 - `optimizer.zero_grad()` replaces every manual `.grad.zero_()`
 
 ### 2c — multi layer, without Sequential
-- input layer (5 features, no perceptron here) -> hidden layer (3 perceptrons) -> output layer (1 perceptron)
+- input layer (5 features, 5 perceptron here) -> hidden layer (3 perceptrons) -> output layer (1 perceptron)
 ```python
 class Model(nn.Module):
     def __init__(self, x):
@@ -658,7 +667,9 @@ len(dataset)   # 10
 	3. **Batching** the single-sample outputs into multi-sample tensors (via a **BatchSampler** + **collate_fn**)
 
 ```python
-dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=2, shuffle=True) 
+
+# drop_last=True -> Fro train daata set if suing BatchNormalization not for test dataset loader
 
 for batch_features, batch_labels in dataloader:
     print(batch_features)
@@ -702,16 +713,16 @@ batch_indices_list = [ [9,2], [5,0], [6,4], [7,1], [3,8] ]
 | Others | `SubsetRandomSampler`, `BatchSampler`, `DistributedSampler` | subsets, custom batching, multi-GPU |
 
 ### DataLoader parameters
-| Parameter | Meaning | Values |
-| --------- | ------- | ------ |
-| **dataset** | the Dataset class object | — |
-| **batch_size** | how many samples to group into one batch before handing it to your training loop | int, e.g. `32` |
-| **shuffle** | if True, randomly reorders the indices **each epoch** so batches come in a new order | True / False |
-| **num_workers** | how many background helper processes load samples in parallel | int, e.g. `0`, `4` |
-| **pin_memory** | if True, puts loaded tensors in pinned (faster) CPU RAM so transfers to GPU are quicker | True / False |
-| **drop_last** | if True, drops the final batch when it has fewer than `batch_size` samples | True / False |
-| **sampler** | if you don't pass one and set `shuffle=True`, PyTorch uses a `RandomSampler`. You can pass an existing one or write your own | — |
-| **collate_fn** | default is `default_collate`. You can pass a different one or write your own | — |
+| Parameter       | Meaning                                                                                                                      | Values             |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| **dataset**     | the Dataset class object                                                                                                     | —                  |
+| **batch_size**  | how many samples to group into one batch before handing it to your training loop                                             | int, e.g. `32`     |
+| **shuffle**     | if True, randomly reorders the indices **each epoch** so batches come in a new order                                         | True / False       |
+| **num_workers** | how many background helper processes load samples in parallel                                                                | int, e.g. `0`, `4` |
+| **pin_memory**  | if True, puts loaded tensors in pinned (faster) CPU RAM so transfers to GPU are quicker                                      | True / False       |
+| **drop_last**   | if True, drops the final batch when it has fewer than `batch_size` samples                                                   | True / False       |
+| **sampler**     | if you don't pass one and set `shuffle=True`, PyTorch uses a `RandomSampler`. You can pass an existing one or write your own | —                  |
+| **collate_fn**  | default is `default_collate`. You can pass a different one or write your own                                                 | —                  |
 
 - **`drop_last=True` matters when you use BatchNorm** — a final batch of size 1 makes `BatchNorm1d` throw (it cannot compute a variance over a single sample)
 - **`shuffle=True` reshuffles every epoch automatically** -> do **not** recreate the DataLoader inside the epoch loop
@@ -784,7 +795,7 @@ print(f"Using device: {device}")
 train_dataLoader = DataLoader(train_dataset_object, batch_size=10, shuffle=True,  pin_memory=True)
 test_dataLoader  = DataLoader(test_dataset_object,  batch_size=10, shuffle=False, pin_memory=True)
 ```
-3. **Move the model**
+3. **Move the model** after initialization 
 ```python
 model = model.to(device)
 ```
@@ -855,11 +866,68 @@ def objective(trial):
     lr       = trial.suggest_float('lr', 1e-5, 1e-1, log=True)
     opt_name = trial.suggest_categorical('optimizer', ['Adam', 'SGD'])
     # ...build the model with these, train it, return the validation metric
-    return val_accuracy
+    
+    # train_loader and test_loader 
+    # make model
+    # loss fun , and optimizer [choose optmizer like if else]
+    # the for each epoch just return best 
+    best_auc=0
+    for i in range(epoch):
+        model.train()
+        epoch_loss_sum=0
+        for features,label in train_loader:
+            optimizer.zero_grad()
+            features,label=features.to(device=device),label.to(device=device)
+            z=model(features)
+            loss=loss_fn(z,label.view(-1,1))
+            loss.backward()
+            optimizer.step()
+            epoch_loss_sum+=loss.item()
+        test_auc=evaluate_auc(model, test_loader)
+        if test_auc>best_auc:
+            best_auc=test_auc
+        if test_auc>all_time_best_auc:
+            all_time_best_auc=test_auc
+            torch.save(model.state_dict(), paramter_path)
+    return best_auc
+
+class MyCustomAnn(nn.Module):
+    def __init__(self,features_count, n_layers, n_units, dropout):
+        super().__init__()
+        layers = []
+        for i in range(n_layers):
+            layers.append(nn.Linear(features_count, n_units))
+            layers.append(nn.BatchNorm1d(n_units))
+            layers.append(nn.ReLU())
+            layers.append(nn.Dropout(dropout))
+            features_count = n_units
+        layers.append(nn.Linear(features_count, 1))
+        self.network = nn.Sequential(*layers)
+    def forward(self,features):
+        return self.network(features)
 
 study = optuna.create_study(direction='maximize')
-study.optimize(objective, n_trials=50)
-print(study.best_params)
+study.optimize(objective, n_trials=100,timeout=7 * 60 * 60) # 7 hours
+print(f'Best trial auc-roc socre: {study.best_trial.value}')
+print(f'Best hyperparameters: {study.best_trial.params}')
+
+# eval and kaggle 
+p = study.best_trial.params
+best_model = MyCustomAnn(x_train_tensor.shape[1],
+                         n_layers=p['n_layers'],
+                         n_units=p['n_units'],
+                         dropout=p['dropout']).to(device)
+
+best_model.load_state_dict(torch.load(paramter_path))
+best_model.eval()
+all_probs= []
+with torch.no_grad():
+	for batch in torch.split(x_kaggle_tensor, 1024):
+		z=model(batch.to(device=device))
+		all_probs.append(torch.sigmoid(z).cpu())  # logits -> probabilities
+    probs = torch.cat(all_probs).numpy().ravel()
+    submission = pd.DataFrame({'id': kaggle_df['id'], 'satisfaction': probs})
+	submission.to_csv(data_path / 'submission_ann.csv', index=False)
 ```
 - `log=True` on the learning rate matters — lr should be searched on a **log scale**, not linear
 
@@ -927,42 +995,98 @@ class MyAnnModel(nn.Module):
     def __init__(self, number_of_features):
         super().__init__()
         self.network = nn.Sequential(
-            nn.Linear(number_of_features, 300), nn.BatchNorm1d(300), nn.ReLU(), nn.Dropout(0.3),
-            nn.Linear(300, 100),                nn.BatchNorm1d(100), nn.ReLU(), nn.Dropout(0.4),
-            nn.Linear(100, 50),                 nn.BatchNorm1d(50),  nn.ReLU(), nn.Dropout(0.5),
+            nn.Linear(number_of_features, 300), 
+            nn.BatchNorm1d(300), 
+            nn.ReLU(), 
+            nn.Dropout(0.3),
+            
+            nn.Linear(300, 100),                
+            nn.BatchNorm1d(100), 
+            nn.ReLU(), 
+            nn.Dropout(0.4),
+            
+            nn.Linear(100, 50),                 
+            nn.BatchNorm1d(50),  
+            nn.ReLU(), 
+            nn.Dropout(0.5),
+            
             nn.Linear(50, 1)                    # raw logit
         )
     def forward(self, x):
         return self.network(x)
 
-epochs, learning_rate = 25, 0.001
+def evaluate_auc(model, data_loader):
+    # eval mode: dropout off, batchnorm uses its running stats; no_grad: no gradient tracking
+    from sklearn.metrics import roc_auc_score
+    model.eval()
+    all_probs, all_labels = [], []
+    with torch.no_grad():
+        for features,label in data_loader:
+            z=model(features.to(device=device))
+            all_probs.append(torch.sigmoid(z).cpu())  # logits -> probabilities
+            all_labels.append(label)
+    probs = torch.cat(all_probs).numpy().ravel()
+    labels = torch.cat(all_labels).numpy().ravel()
+    return roc_auc_score(labels, probs)
+
+epochs, learning_rate = 25, 1e-3
 model = MyAnnModel(x_train_tensor.shape[1]).to(device)
 loss_function = nn.BCEWithLogitsLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
+
+# Early stoping with max time
+epochs_without_improvement = 0
+patience = 5
+start_time = time.time()
+max_seconds = 7 * 60 * 60   # 7 hours                
+paramter_path=base_path / 'best_ann.pth'
+best_auc=0
 
 # 5. train
 for i in range(epochs):
     model.train()
     epoch_loss = 0
     for x, y in train_dataLoader:
+	    optimizer.zero_grad()
         x, y = x.to(device), y.to(device)
-        optimizer.zero_grad()
-        loss = loss_function(model(x), y)
+        z=model(x)
+        loss = loss_function(z, y.view(-1,1))
         loss.backward()
         optimizer.step()
         epoch_loss += loss.item()
-    print(f"epoch {i+1} - avg loss {epoch_loss/len(train_dataLoader)}")
+    test_auc=evaluate_auc(model, test_dataLoader)
+    if test_auc>best_auc:
+        best_auc=test_auc
+        epochs_without_improvement = 0
+        torch.save(model.state_dict(), paramter_path)
+        status = "NEW BEST - saved"
+    else:
+        epochs_without_improvement +=1
+        status = f"no improvement ({epochs_without_improvement}/{patience})"
+    print(f"epoch {i+1} | loss {epoch_loss_sum/len(train_data_loader):.5f} | "
+          f"test AUC {test_auc:.5f} | {status}")
+    if epochs_without_improvement >= patience:
+        print("Early stopping at epoch", i+1)
+        break
+    if time.time() - start_time >= max_seconds:
+        print("Time limit reached at epoch", i+1)
+        break
 
-# 6. evaluate
+
+#Kaggle
+x_test = pd.read_csv(x_test, header=None)
+x_test_processed = preprocessor.transform(x_test) # sklearn pipeline
+x_train_tensor = torch.from_numpy(x_test_processed.to_numpy(dtype=np.float32))
+# from sklearn.metrics import roc_auc_score
 model.eval()
-correct = total = 0
+all_probs= []
 with torch.no_grad():
-    for x, y in test_dataLoader:
-        x, y = x.to(device), y.to(device)
-        pred = (torch.sigmoid(model(x)) > 0.5).float()
-        total   += y.shape[0]
-        correct += (pred == y).sum().item()
-print("accuracy:", correct/total)
+	for batch in torch.split(x_kaggle_tensor, 1024):
+		z=model(batch.to(device=device))
+		all_probs.append(torch.sigmoid(z).cpu())  # logits -> probabilities
+    probs = torch.cat(all_probs).numpy().ravel()
+    submission = pd.DataFrame({'id': kaggle_df['id'], 'satisfaction': probs})
+	submission.to_csv(data_path / 'submission_ann.csv', index=False)
 ```
 
 ## PyTorch vs sklearn mental map

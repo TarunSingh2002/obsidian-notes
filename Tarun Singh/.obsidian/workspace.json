@@ -4,24 +4,39 @@
     "type": "split",
     "children": [
       {
-        "id": "402dc9b7cdaa9387",
+        "id": "7042fff88035ace4",
         "type": "tabs",
         "children": [
           {
-            "id": "36f879a58be67444",
+            "id": "b9d79c54b4ab94fc",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
+                "file": "Machine Learning/Theory/HyperParamterTunning.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Ultimate-Practical-Cheat-Sheet"
+              "title": "HyperParamterTunning"
+            }
+          },
+          {
+            "id": "239f1a122858756a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Deep Learning/CheatSheet-PyTorch.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "CheatSheet-PyTorch"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -187,19 +202,19 @@
       "bases:Create new base": false
     }
   },
-  "active": "36f879a58be67444",
+  "active": "239f1a122858756a",
   "lastOpenFiles": [
-    "Machine Learning/Theory/Feature Engineering.md",
-    "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
-    "AWS/Billing And Cost Management.md",
-    "AWS/Amazon EC2.md",
-    "AWS/AWS Basis.md",
-    "AWS/IAM.md",
-    "Deep Learning/CheatSheet-Tensorflow.md",
+    "Machine Learning/Theory/HyperParamterTunning.md",
     "Deep Learning/CheatSheet-PyTorch.md",
+    "Deep Learning/CheatSheet-Tensorflow.md",
+    "AWS/Amazon EC2.md",
+    "AWS/IAM.md",
+    "AWS/Billing And Cost Management.md",
+    "AWS/AWS Basis.md",
+    "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
+    "Machine Learning/Theory/Feature Engineering.md",
     "Machine Learning/Cheat-Sheet/Pandas-Cheat-Sheet.md",
     "Untitled",
-    "Machine Learning/Theory/HyperParamterTunning.md",
     "Machine Learning/Theory/Matrics.md",
     "Machine Learning/Theory/Basics of Machine Learning.md",
     "Machine Learning/EDA/EDA_Draft1.md",
