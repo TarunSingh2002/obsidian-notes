@@ -27,7 +27,7 @@ tags:
 	- Episode: a sequence with a clear end (like one game round).
 	- Continuing: a never-ending task. (like Autonomous Traffic Light Control System)
 	- Trajectory: A trajectory $\tau$ is the full sequence of states, actions, and rewards
-		- $\tau = (s_0, a_0, r_0,\ s_1, a_1, r_1,\ s_2, a_2, r_2,\ \dots,\ s_T, a_T, r_T)$
+		- $\tau = (s_0, a_0, r_1,\ s_1, a_1, r_2,\ s_2, a_2, r_3,\ \dots,\ s_T, a_T, r_T+1)$
 - **State:**
 	- A description of the situation the agent finds itself in.
 	- Denoted by ($S_t$) which mean State (S) at timestamp (t)
@@ -102,6 +102,8 @@ tags:
 		 - $\mathbb{E}[G_{t+1} \mid S_{t+1} = s'] = v_\pi(s')$ by definition. So: $\boxed{v_\pi(s) = \sum_a \pi(a \mid s) \sum_{s', r} p(s', r \mid s, a)\Big[r + \gamma v_\pi(s')\Big]}$
 	- **Bellman equations for action value:**
 		- $\boxed{q_\pi(s,a) = \sum_{s',r} p(s',r \mid s,a)\left[r + \gamma \sum_{a'} \pi(a' \mid s') q_\pi(s', a')\right]}$
+	- Bellman optimality equations:
+	![[Pasted image 20261101162440.png]]
 - **Exploration vs Exploitation**
 	- Should the agent try new actions to learn (explore) or use its current best action to get reward (exploit)?
 	- Analogy: Trying a new route in a race (maybe faster) vs sticking to the route that already works.

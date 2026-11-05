@@ -338,122 +338,95 @@ X_train['week']       = d.dt.isocalendar().week.astype(int)
 X_train['hour']       = d.dt.hour                       # if time exists
 ```
 ##### Numerical columns
+**Goal:** for each numeric column, write ONE line of notes that answers 5 questions.
+You are not fixing anything here, only noting. Fixes come later (bivariate + preprocessing).
 
 ```python
-for i in numerical_continuous_column:
-    print("column name =>", i)
-    print(x_train[i].describe())
-    print("skew =>", x_train[i].skew())
-    print('kurtosis =>', x_train[i].kurt())
-    fig, ax = plt.subplots(2,2, figsize=(11,7))
-    sns.histplot(x=x_train[i], kde=True ,ax=ax[0,0], bins = 20)
-    sns.boxplot(x=x_train[i], ax=ax[0,1])
-    stats.probplot(x_train[i], dist="norm", plot=ax[1,0])
-    plt.tight_layout()
-    plt.show()
+for i in numerical_columns:
+    s = X_train[i]
+    q1, q3 = s.quantile([0.25, 0.75]); iqr = q3 - q1
+    print("=" * 50, "\n", i)
+    print("unique      :", s.nunique())                                   # Q1
+    print("min / max   :", s.min(), "/", s.max())                         # Q2
+    print("mean/median :", round(s.mean(), 2), "/", round(s.median(), 2), "| skew:", round(s.skew(), 2))   # Q3
+    print("top value % :", round(s.value_counts(normalize=True).iloc[0] * 100, 2), "| value:", s.mode()[0])  # Q3 spike
+    print("outlier %   :", round(((s < q1 - 1.5*iqr) | (s > q3 + 1.5*iqr)).mean() * 100, 2),"| p99:", s.quantile(0.99), "| max:", s.max())                  # Q4
+    print("test median :", X_test[i].median())                            # Q5
+    fig, ax = plt.subplots(1, 2, figsize=(11, 3))
+    sns.histplot(s, bins=50, ax=ax[0]); sns.boxplot(x=s, ax=ax[1])
+    plt.show()
 ```
 
-###### Reading describe
-- min = Help us find out do we have impossible value.
-- max = a very large value indicate, outliers may exist.
-- count = tell us about missing rows
-- mean vs 50 percentile = mean > median = right skew, and also mean get effected by outliers, so we trust the median
-###### Reading std
-- one number answering "on average, how far do values sit from the mean?"
-- std is measured **in the column's own units**. 
-- For example
-	- `[10, 10, 10, 10]` → everyone exactly at the mean → std = 0.
-	- `[0, 20, 0, 20]` → same mean (10), but everyone sits 10 away from it → std = 10. Bigger std = values more spread out. That's the whole idea.
+###### Q1. Is it really numeric? → look at `unique`
 
-**Rule 1 = std ÷ range (range = max − min). This turns std into a scale-free score:**
+| You see | Meaning | Note it as |
+|---|---|---|
+| ≤ ~15 unique values | a count/code, not a smooth number | **discrete** → also read `value_counts()` like a categorical |
+| many unique values | real continuous number | continue |
 
-```python
-r = X_train[col]
-ratio = r.std() / (r.max() - r.min())
+###### Q2. Any impossible values? → look at `min / max`
+Ask: *can this value exist in real life?* (age = −3, amount = 0 on a payment, % > 100).
+
+| You see | Note it as |
+|---|---|
+| all possible | OK |
+| impossible value | **error** → treat as missing later |
+| a suspicious round value (0, −1, 999) many times | **placeholder** → maybe "missing in disguise" |
+
+###### Q3. What shape? → `mean vs median`, `skew`, `top value %`, histogram
+
+| You see | Shape | Note it as |
+|---|---|---|
+| mean ≈ median, \|skew\| < 1 | symmetric (bell or flat) | **symmetric** |
+| mean ≫ median, skew > 1 | long right tail (money, time, counts) | **right-skewed** |
+| mean ≪ median, skew < −1 | long left tail | **left-skewed** |
+| `top value %` large (> ~5%) on a continuous column | one value repeated a lot (often 0 or min) | **spike at X** → candidate `is_X` flag |
+| histogram has 2 humps | two hidden groups | **two humps** → find the column that splits them (bivariate) |
+
+Skew number is enough. Kurtosis/QQ plot are not needed: the outlier % below tells the same story in plain words.
+
+###### Q4. How heavy are the tails? → `outlier %`, `p99 vs max`
+
+| You see | Meaning | Note it as |
+|---|---|---|
+| outlier % < ~1% and max close to p99 | tame tails | **no tails** |
+| outlier % > ~1%, or max ≫ p99 (e.g. 5×) | a few huge values | **heavy tail** |
+
+An outlier is **not an error**. Only delete a row if Q2 said impossible. In fraud/rare-event problems the outliers are often exactly the rows you want to catch — check them in bivariate.
+
+###### Q5. Does test look like train? → `median` vs `test median` (+ histogram if you want)
+
+| You see | Note it as |
+|---|---|
+| medians close | **same as test** |
+| clearly different | **shift** → be careful, this column may not generalize |
+
+---
+
+###### Write the note (one line per column)
+
+```
+amount_usd   : continuous | OK | right-skewed | heavy tail | same as test
+velocity_x   : continuous | OK | symmetric + spike at 0 (7%) | no tails | same as test
 ```
 
-| std ÷ range  | plain meaning                                                 | picture   |
-| ------------ | ------------------------------------------------------------- | --------- |
-| ~0.00 – 0.05 | values almost all the same (nearly constant)                  | `▁▁█▁▁`   |
-| ~0.10 – 0.20 | bunched around the middle, bell-like                          | `▁▂▅█▅▂▁` |
-| ~0.25 – 0.35 | spread out flat/evenly across the whole range                 | `▅▅▅▅▅▅▅` |
-| ~0.40 – 0.50 | values pile at the two ENDS (0.5 is the mathematical maximum) | `█▁▁▁▁▁█` |
-**Ruler 2 — std ÷ mean** (the _coefficient of variation_, CV) — for comparing spread **across different columns**. Only valid when the column is all-positive.
-###### Reading Skewness
+###### What the note means later (only at preprocessing time)
 
-| `.skew()`              | verdict           | action (for LINEAR models only — trees ignore skew completely) |
-| ---------------------- | ----------------- | -------------------------------------------------------------- |
-| −0.5 … +0.5            | symmetric         | nothing                                                        |
-| 0.5 … 1 (or −1 … −0.5) | mild              | usually nothing                                                |
-| **> +1**               | strong right skew | log1p or Yeo-Johnson transform                                 |
-| **< −1**               | strong left skew  | square or Yeo-Johnson transform                                |
-
-###### Reading Kurtosis
-- Kurtosis is a **"surprise tails" score**: compared to a bell curve, does this column produce **more** extreme values or **fewer**? (pandas `.kurt()` is centered so a perfect bell = 0.)
-
-| `.kurt()`               | meaning                                                                  | what you do                                                                                                   |
-| ----------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| around 0                | tails like a normal bell                                                 | nothing                                                                                                       |
-| clearly positive (> +1) | MORE extreme values than a bell — sharp peak, long tails                 | expect real outliers → go stare at the **boxplot**                                                            |
-| clearly negative (< −1) | almost NO extreme values — flat top, box-like, or several separate humps | go stare at the **histogram**: is it flat? multiple humps? only a few distinct bars (a category in disguise)? |
-###### Reading Histogram
-- A histogram chops the value range into buckets ("bins") and shows how many rows fall in each. Default bins are fine; blocky → try `bins=50`, spiky/noisy → try `bins=20`.
-
-*Finding how big spike at the minimum value -- A python Trick*
-```Python
-col = X_train['Annual_Income_USD']
-# how big is the spike at the minimum?
-at_min = (col == col.min()).sum()
-print("rows at min:", at_min, "=>", at_min / len(col) * 100, "%")
-```
-
-| shape               | picture    | plain meaning                                   | everyday example                                | action                                                                             |
-| ------------------- | ---------- | ----------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Bell                | `▁▂▅█▅▂▁`  | symmetric, normal-ish                           | adult heights                                   | nothing                                                                            |
-| Right skew          | `▂█▅▃▂▁▁▁` | long right tail; mean > median                  | income                                          | log1p / YJ for linear                                                              |
-| Left skew           | `▁▁▁▂▃▅█▂` | long left tail                                  | easy-exam scores                                | square / YJ for linear                                                             |
-| Uniform / flat      | `▅▅▅▅▅▅▅`  | every value about equally common                | lottery digits; synthetic Kaggle features       | nothing — perfectly fine; **NOT droppable**                                        |
-| Bimodal (two humps) | `▂█▂▁▂█▂`  | two hidden groups mixed together                | heights of men+women combined                   | find the column that separates the humps (Step 5/6); consider a "which group" flag |
-| **Spike + tail**    | `█▂▁▂▂▁▁`  | one special value (often 0) plus a distribution | yearly medical spend (many people spend 0)      | **add binary `is_zero` feature; log1p the rest**                                   |
-| Comb / gaps         | `█▁█▁█▁█`  | only certain values occur                       | anything rounded or coded                       | it's discrete in disguise → reroute to §5.2                                        |
-| Wall at an edge     | `█▅▃▂▁`    | values piled against a hard floor/cap           | percentages at 0 or 100; sensor maxed out       | note the bound; it's a property, not an error                                      |
-| Isolated island     | `▅█▅▁▁▁▁▂` | main mass + a small far-away cluster            | heights: 170-ish cm plus a clump at 5.9 (feet!) | investigate: unit error? special segment?                                          |
-###### Boxplot 
-```
-   fliers      whisker             box              whisker      fliers
-   o  o    |------------[ Q1 ═══╪═══ Q3 ]------------|       o o o
-                               median
-   box       = the middle 50% of values (Q1 to Q3; its width = IQR)
-   whisker   = stretches to the furthest point within 1.5×IQR of the box
-   flier (o) = any point beyond the whiskers
-```
-- **Median line off-center**, or **one whisker much longer** → skew, on the long side.
-- **Fliers are NOT automatically errors.** "Beyond 1.5×IQR" is just a drawing convention; on skewed or heavy-tailed data, plenty of perfectly real values land there. A flier is an _invitation to look at the row_, never a deletion order.
-- **Weakness:** a boxplot cannot show two humps — a bimodal column and a bell can draw the same box. If kurtosis was very negative or the histogram looked lumpy, confirm with `sns.violinplot(data=X_train, x=col)` (a violin = boxplot + shape).
-
-###### QQ plot
-- Answers one question: "how close is this column to a normal bell curve?" (Useful for choosing z-score vs IQR outlier bounds later; that's about it.)
-```python
-stats.probplot(X_train[col], dist="norm", plot=plt); plt.show()
-```
-
-| pattern                       | meaning                                    |
-| ----------------------------- | ------------------------------------------ |
-| points hug the diagonal line  | ~normal                                    |
-| right end curls up (J shape)  | right skew                                 |
-| left end curls down           | left skew                                  |
-| both ends peel away (S shape) | heavier/lighter tails than normal          |
-| staircase / steps             | few distinct values → discrete in disguise |
+| Note | Tree models (XGBoost/LightGBM/CatBoost, RandomForest) | Linear / KNN / NN |
+|---|---|---|
+| discrete | nothing | nothing (or one-hot if few values) |
+| error / placeholder | → NaN | → NaN + impute |
+| right-skewed / heavy tail | **nothing** (trees only care about order) | `log1p` or Yeo-Johnson, then scale |
+| left-skewed | nothing | Yeo-Johnson, then scale |
+| spike at X | optional `is_X` flag | add `is_X` flag |
+| symmetric | nothing | scale |
+| shift | consider drop / test in CV | same |
 
 #### Step 2 Bivariate - every feature vs the TARGET
 - This is where two things get decided: **which features matter**, and **which model family to expect to win**.
 - what bivariate tells you about model choice
 	- Mostly **straight lines / clean level-shifts** → expect **linear models** (Linear/Ridge/Logistic) to do well → keep them, they're fast and interpretable.
 	- **Steps, curves, U-shapes, threshold effects** → expect **tree ensembles** (RandomForest, XGBoost) to win — they carve thresholds natively.
-##### Continuous Number Feature vs Continuous Numeric Target
-
-##### Discrete Number / Categorical / Binary Feature vs Continuous Numeric Target
-- **What we are doing (one line):** check — do the groups have **different target averages**?. Different target averages→ the column helps predict. Same target averages→ it doesn't. 
 ##### Continuous Number Feature vs Categorical Target
 ```python
 base = (y_train == 'Yes').mean()
@@ -467,7 +440,7 @@ for i in discrete_numerical:
     ct['count_percentage'] = (ct['count'] / len(X_train))*100
     ct['lift'] = ct['Yes'] / base
     print(ct.round(3))
-    big = ct.loc[ct['count_percentage'] >= 0.01, 'lift']
+    big = ct.loc[ct['count_percentage'] >= 1, 'lift']
     spread = big.max() - big.min()
     verdict = 'STRONG' if spread > 0.5 else 'MILD' if spread >= 0.1 else 'WEAK'
     print(f"{i}: lift spread = {spread:.2f} → {verdict}")
@@ -491,11 +464,12 @@ for i in normial_categorical + ordinal_categorical + binary_columns:
     ct['count_percentage'] = (ct['count'] / len(X_train))*100
     ct['lift'] = ct['Yes'] / base
     print(ct.round(3))
-    big = ct.loc[ct['count_percentage'] >= 0.01, 'lift']         # judge only on categories with >= 1% of rows
+    big = ct.loc[ct['count_percentage'] >= 1, 'lift']         # judge only on categories with >= 1% of rows
     spread = big.max() - big.min()
     verdict = 'STRONG' if spread > 0.5 else 'MILD' if spread >= 0.1 else 'WEAK'
     print(f"{i}: lift spread = {spread:.2f} → {verdict}")
-    ax = ct['lift'].plot(kind='bar', title=i)
+    fig, ax = plt.subplots()
+    ct['lift'].plot(kind='bar', title=i,ax=ax)
     ax.axhline(1, ls='--', color='red')               # red line = the average person
     plt.show()
     print("=" * 100)
@@ -519,7 +493,73 @@ for i in normial_categorical + ordinal_categorical + binary_columns:
 | Ordinal     | One sudden change, flat on both sides | Keep the number and add a flag at the change                                         |
 | Ordinal     | Goes up then down (or down then up)   | Linear models: one-hot. Trees: keep as number                                        |
 
+##### Continuous Number Feature vs Continuous Numeric Target
+```python
+for i in continuous_columns:
+    # 1. first look: dots + straight red line (sample, because many dots hide the pattern)
+    x = X_train[i].sample(min(5000, len(X_train)), random_state=42)
+    sns.regplot(x=x, y=y_train.loc[x.index], scatter_kws={'alpha': 0.2, 's': 8}, line_kws={'color': 'red'}); plt.show()
+    # 2. two correlation numbers
+    print(i, "| pearson:", round(X_train[i].corr(y_train), 3), "| spearman:", round(X_train[i].corr(y_train, method='spearman'), 3))
+    # 3. cut into 10 equal-size groups, then the gap table
+    bins = pd.qcut(X_train[i], q=10, duplicates='drop')
+    tab = y_train.groupby(bins, observed=True).agg(avg='mean', median='median', count='count')
+    tab['count_percentage'] = (tab['count'] / len(X_train))*100
+    tab['gap'] = (tab['avg'] - y_train.mean()) / y_train.std()
+    print(tab.round(3))
+    big = tab.loc[tab['count_percentage'] >= 1, 'gap']          # judge only on groups with >= 1% of rows
+    spread = big.max() - big.min()
+    verdict = 'STRONG' if spread > 0.5 else 'MILD' if spread >= 0.1 else 'WEAK'
+    print(f"{i}: gap spread = {spread:.2f} → {verdict}")
+    ax = tab['gap'].plot(kind='bar', title=i)
+    ax.axhline(0, ls='--', color='red')                         # red line = the average row
+    plt.show()
+    print("=" * 100)
+```
+- **Gap** is lift for a numeric target: how far this group's average target sits from the overall average, in target-std units.
+	- **0** means this group is average.
+	- **+1** means 1 std above average.
+	- **−0.5** means half a std below average.
+- **Pearson** measures a straight line. **Spearman** measures "goes up together", straight or curved. Both run from −1 to +1.
+- Target heavily right-skewed? Run the same code with `np.log1p(y_train)` and trust the `median` column.
 
+| What you see | Meaning | Action |
+| --- | --- | --- |
+| Gap bars all ≈ 0, both correlations ≈ 0 | Weak alone | Do nothing now; drop candidate after modeling |
+| Bars climb or fall steadily, pearson ≈ spearman | Straight line | Keep as is; linear models will do well |
+| Bars climb or fall steadily, spearman clearly stronger than pearson | Curve, or outliers hiding the line | Linear: `log1p` / Yeo-Johnson. Trees: nothing |
+| One sudden jump, flat on both sides | Threshold | Add a flag at the jump |
+| Bars go up then down (or down then up), correlations ≈ 0 | U-shape; correlation misses it | **Trust the table.** Trees: nothing. Linear: add a squared term or use the groups |
+
+##### Discrete Number / Categorical / Binary Feature vs Continuous Numeric Target
+```python
+for i in nominal_columns + ordinal_columns + binary_columns + discrete_columns:
+    tab = y_train.groupby(X_train[i]).agg(avg='mean', median='median', count='count')
+    tab['count_percentage'] = (tab['count'] / len(X_train))*100
+    tab['gap'] = (tab['avg'] - y_train.mean()) / y_train.std()
+    print(tab.round(3))
+    big = tab.loc[tab['count_percentage'] >= 1, 'gap']          # judge only on categories with >= 1% of rows
+    spread = big.max() - big.min()
+    verdict = 'STRONG' if spread > 0.5 else 'MILD' if spread >= 0.1 else 'WEAK'
+    print(f"{i}: gap spread = {spread:.2f} → {verdict}")
+    ax = tab['gap'].plot(kind='bar', title=i)
+    ax.axhline(0, ls='--', color='red')                         # red line = the average row
+    plt.show()
+    print("=" * 100)
+```
+- A discrete column with many values (more than ~20) → use the continuous section above.
+- **Step 1: Ignore categories under 1% of rows** when judging. Keep them in the data.
+- **Step 2: Is the column useful?** All gaps ≈ 0 means it's weak. Gaps far from 0 on either side mean it's useful.
+- **Step 3: Action by column type:**
+
+| Column type | What you see | Action |
+| --- | --- | --- |
+| Any | All gaps ≈ 0 | Weak. Do nothing now; drop candidate after modeling. (A flag you created: drop now.) |
+| Binary | Gaps far from 0 | Map to 0/1. Done |
+| Nominal | Some gaps far from 0 | One-hot. Done |
+| Ordinal / Discrete | Steady climb or steady fall | Do nothing, the number or ordinal encoding covers it |
+| Ordinal / Discrete | One sudden change, flat on both sides | Keep the number and add a flag at the change |
+| Ordinal / Discrete | Goes up then down (or down then up) | Linear models: one-hot. Trees: keep as number |
 
 #### Step 2 Multivariate
 ##### Twin columns (Question 1: "Do I have twin columns?)
