@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "5ffee01e81dbe0e0",
+        "id": "baa5294d027498b7",
         "type": "tabs",
         "children": [
           {
-            "id": "ad490858f957b022",
+            "id": "a6b9fc5f6e9ce571",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Ultimate-Practical-Cheat-Sheet"
+              "title": "New tab"
             }
           }
         ]
@@ -187,10 +183,10 @@
       "bases:Create new base": false
     }
   },
-  "active": "ad490858f957b022",
+  "active": "a6b9fc5f6e9ce571",
   "lastOpenFiles": [
-    "Machine Learning/Cheat-Sheet/sedEJUiDT",
     "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
+    "Machine Learning/Cheat-Sheet/sedEJUiDT",
     "Reinforcement Learning/RL- Dynamic Programming.md",
     "Reinforcement Learning/Gym Library.md",
     "Reinforcement Learning/Reinforcement-Learning-Basics.md",
@@ -234,7 +230,6 @@
     "AWS",
     "AI-Engineer/LangGraph",
     "AI-Engineer",
-    "AI Engineer",
     "Untitled.canvas"
   ]
 }

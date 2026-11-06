@@ -375,21 +375,21 @@ Ask: *can this value exist in real life?* (age = −3, amount = 0 on a payment, 
 
 ###### Q3. What shape? → `mean vs median`, `skew`, `top value %`, histogram
 
-| You see | Shape | Note it as |
-|---|---|---|
-| mean ≈ median, \|skew\| < 1 | symmetric (bell or flat) | **symmetric** |
-| mean ≫ median, skew > 1 | long right tail (money, time, counts) | **right-skewed** |
-| mean ≪ median, skew < −1 | long left tail | **left-skewed** |
-| `top value %` large (> ~5%) on a continuous column | one value repeated a lot (often 0 or min) | **spike at X** → candidate `is_X` flag |
-| histogram has 2 humps | two hidden groups | **two humps** → find the column that splits them (bivariate) |
+| You see                                            | Shape                                     | Note it as                                                   |
+| -------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------ |
+| mean ≈ median, \|skew\| < 1                        | symmetric (bell or flat)                  | **symmetric**                                                |
+| mean ≫ median, skew > 1                            | long right tail (money, time, counts)     | **right-skewed**                                             |
+| mean ≪ median, skew < −1                           | long left tail                            | **left-skewed**                                              |
+| `top value %` large (> ~5%) on a continuous column | one value repeated a lot (often 0 or min) | **spike at X** → candidate `is_X` flag                       |
+| histogram has 2 humps                              | two hidden groups                         | **two humps** → find the column that splits them (bivariate) |
 
 Skew number is enough. Kurtosis/QQ plot are not needed: the outlier % below tells the same story in plain words.
 
 ###### Q4. How heavy are the tails? → `outlier %`, `p99 vs max`
 
-| You see | Meaning | Note it as |
-|---|---|---|
-| outlier % < ~1% and max close to p99 | tame tails | **no tails** |
+| You see                                 | Meaning           | Note it as     |
+| --------------------------------------- | ----------------- | -------------- |
+| outlier % < ~1% and max close to p99    | tame tails        | **no tails**   |
 | outlier % > ~1%, or max ≫ p99 (e.g. 5×) | a few huge values | **heavy tail** |
 
 An outlier is **not an error**. Only delete a row if Q2 said impossible. In fraud/rare-event problems the outliers are often exactly the rows you want to catch — check them in bivariate.
