@@ -14,14 +14,19 @@
 
 ### **The 5 Methods You Must Know**
 
-| Method                                                                         | What it does                     | What it gives back               |
-| ------------------------------------------------------------------------------ | -------------------------------- | -------------------------------- |
-| `gym.make("Name")` / `Maze()`                                                  | Creates the environment          | An env object                    |
-| `env.reset()`                                                                  | Puts the env back at the start   | The starting state               |
-| `env.step(action)`                                                             | Does one action in the env       | `next_state, reward, done, info` |
-| `env.render()`                                                                 | Draws the current state          | An image (numpy array)           |
-| `env.close()`                                                                  | Shuts the env down, frees memory | Nothing                          |
-| env.observation_space<br><br>env.action_space<br><br>env.action_space.sample() |                                  |                                  |
+| Method                                                                         | What it does                                            | What it gives back                                                                     |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `gym.make("Name")` / `Maze()`                                                  | Creates the environment                                 | An env object                                                                          |
+| `env.reset()`                                                                  | Puts the env back at the start                          | The starting state                                                                     |
+| `env.step(action)`                                                             | Does one action in the env                              | `next_state, reward, done, info`  \|\| next_state, reward, terminated, truncated, info |
+| `env.render()`                                                                 | Draws the current state                                 | An image (numpy array)                                                                 |
+| `env.close()`                                                                  | Shuts the env down, frees memory                        | Nothing                                                                                |
+| env.observation_space<br><br>env.action_space<br><br>env.action_space.sample() |                                                         |                                                                                        |
+| print(env.unwrapped.__doc__)                                                   | To get the full description for the unknown environment |                                                                                        |
+| print(env.reward_range)                                                        | Smallest and biggest possible reward                    |                                                                                        |
+| print(env.unwrapped.P)                                                         | probability for dp                                      | {s1:[  a1:(prob, next_state, reward, done), a2:() ], s2:[]}                            |
+| env.observation_space.n                                                        |                                                         |                                                                                        |
+| env.action_space.n                                                             |                                                         |                                                                                        |
 
 - **1. Making the environment**
 	- For built-in envs you pass the name as a string to `gym.make`.
@@ -152,6 +157,24 @@ env.close()
 
 - **Full episode** → use a `while not done` loop (run until the goal)
 ```python
+
+# for display video part
+import matplotlib.pyplot as plt
+from matplotlib import animation
+from IPython.display import HTML
+def display_video(frames, fps=2):
+    fig = plt.figure()
+    plt.axis("off")
+    img = plt.imshow(frames[0])
+    def update(i):
+        img.set_data(frames[i])
+        return [img]
+    anim = animation.FuncAnimation(fig, update, frames=len(frames), interval=1000/fps)
+    plt.close(fig)
+    return HTML(anim.to_jshtml())
+
+
+
 env = Maze()
 state = env.reset()
 episode = []
@@ -210,10 +233,31 @@ action = np.random.choice(range(4), p=probs)   # pick an action using those prob
 
 ---
 
-### **The Full Template (put it all together)**
+### **The Full Template (put it all together) for old** 
 
 - Every RL program you write will look like this. Only the `policy` changes as you learn better algorithms.
 ```python
+
+# for display video part
+import matplotlib.pyplot as plt
+from matplotlib import animation
+from IPython.display import HTML
+def display_video(frames, fps=2):
+    fig = plt.figure()
+    plt.axis("off")
+    img = plt.imshow(frames[0])
+    def update(i):
+        img.set_data(frames[i])
+        return [img]
+    anim = animation.FuncAnimation(fig, update, frames=len(frames), interval=1000/fps)
+    plt.close(fig)
+    return HTML(anim.to_jshtml())
+
+
+
+
+
+
 env = Maze()                     # 1. make env
 state = env.reset()              # 2. start episode
 done = False
@@ -225,10 +269,45 @@ while not done:
 	next_state, reward, done, info = env.step(action)         # 4. do the action
 	frames.append(env.render(mode="rgb_array"))               # 5. save a picture
 	state = next_state                                        # 6. move on
-
 env.close()                      # 7. clean up
+display_video(frames)
 ```
+---
+### **The Full Template (put it all together) for new** 
 
+- Every RL program you write will look like this. Only the `policy` changes as you learn better algorithms.
+```python
+
+import matplotlib.pyplot as plt
+from matplotlib import animation
+from IPython.display import HTML
+def display_video(frames, fps=2):
+    fig = plt.figure()
+    plt.axis("off")
+    img = plt.imshow(frames[0])
+    def update(i):
+        img.set_data(frames[i])
+        return [img]
+    anim = animation.FuncAnimation(fig, update, frames=len(frames), interval=1000/fps)
+    plt.close(fig)
+    return HTML(anim.to_jshtml())
+
+state, info = env.reset()                 # NEW: returns (state, info)
+done = False
+frames = [env.render()]                   # NEW: no mode here, it was set in gym.make
+steps = 0
+while not done and steps < 100:           # safety stop: never loop forever
+    action = policy[state]
+    next_state, reward, terminated, truncated, info = env.step(action)   # NEW: 5 values
+    done = terminated or truncated        # same meaning as old "done"
+    frames.append(env.render())
+    state = next_state
+    steps += 1
+
+env.close()
+print("steps taken:", steps)
+display_video(frames)
+```
 ---
 
 ### **Old Gym (course) vs New Gymnasium**
@@ -258,3 +337,81 @@ while not done:
 	done = terminated or truncated      # same meaning as old "done"
 env.close()
 ```
+
+---
+
+### **`env.unwrapped.P` → the game rules table (the model, used in DP)**
+
+- **What is it?**
+	- The env's **full rule book**: for every state and every action, it lists everything that can happen next and with what probability.
+	- It is exactly $p(s', r \mid s, a)$ from the Bellman equation, stored as a Python dict.
+	- DP (Value Iteration, Policy Iteration) needs this. You **don't** need it to just play with `env.step()`.
+
+- **Why is it not in `env.unwrapped.__doc__`?**
+	- `__doc__` only explains **how to play** the game (actions, states, rewards).
+	- `P` is an **internal attribute** the env uses to run `step()`. It's not part of the official "5 methods" API, so the docs don't advertise it.
+	- How to find things like this yourself: `print(dir(env.unwrapped))` → lists every attribute of the env. You'll see `P` there.
+
+- **Which envs have it?**
+
+| Env | Has `P`? | Why |
+| --- | --- | --- |
+| FrozenLake | ✅ | Few states (16), fixed rules |
+| CliffWalking, Taxi | ✅ | Same family ("toy text" envs), small grids |
+| CartPole, MountainCar, Atari | ❌ | Infinite / huge number of states, no table possible |
+| Instructor's Maze | Only if he wrote one | Custom env: you build `P` yourself if you want DP |
+
+- Safe check before using it: `hasattr(env.unwrapped, 'P')` → `True` / `False`
+- No `P` → no DP. Use methods that learn by playing (Monte Carlo, TD, Q-learning).
+
+- **Does it change?** No. For a given env + settings it's **fixed** (FrozenLake slippery is always 1/3, 1/3, 1/3). But if you change the settings, `P` changes:
+	- `is_slippery=False` → each action has **1 result** with prob 1.0
+	- `map_name="8x8"` → 64 states instead of 16
+
+- **Format (3 levels)**
+	- `P` → dict with one key per **state** (FrozenLake 4x4: 0 to 15)
+	- `P[state]` → dict with one key per **action** (0 = Left, 1 = Down, 2 = Right, 3 = Up)
+	- `P[state][action]` → **list of possible results**, each one a tuple:
+		- `(prob, next_state, reward, done)`
+
+| Tuple item | Meaning | Bellman symbol |
+| --- | --- | --- |
+| `prob` | Chance this result happens | $p(s', r \mid s, a)$ |
+| `next_state` | Where I land | $s'$ |
+| `reward` | Reward I get | $r$ |
+| `done` | `True` if the game ends here (hole or goal) | terminal → no future, $v = 0$ |
+
+- **FrozenLake 4x4 map with state numbers**
+```
+S  F  F  F      0  1  2  3
+F  H  F  H      4  5  6  7
+F  F  F  H      8  9 10 11
+H  F  F  G     12 13 14 15
+```
+
+- **Real examples (`is_slippery=True`)**
+```python
+P = env.unwrapped.P
+
+print(P[0][0])    # state 0, action Left
+# [(0.333, 0, 0, False),   slipped up   -> wall, stay at 0
+#  (0.333, 0, 0, False),   went left    -> wall, stay at 0
+#  (0.333, 4, 0, False)]   slipped down -> land on 4
+
+print(P[14][2])   # state 14, action Right
+# [(0.333, 14, 0, False),  slipped up
+#  (0.333, 15, 1, True),   reached Goal -> reward 1, game over
+#  (0.333, 10, 0, False)]  slipped down
+
+print(P[5][0])    # state 5 is a Hole
+# [(1.0, 5, 0, True)]      game already over, you stay there
+```
+
+- **How to use it in a loop** (this one line is the "inner Σ over results")
+```python
+for prob, next_state, reward, done in env.unwrapped.P[s][a]:
+	# prob × (reward + γ × V[next_state])   ← skip the γ × V part when done is True
+	...
+```
+
+- **Old gym vs new gymnasium:** same `env.unwrapped.P` in both, same format.

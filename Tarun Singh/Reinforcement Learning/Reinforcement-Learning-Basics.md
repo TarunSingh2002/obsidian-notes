@@ -98,12 +98,28 @@ tags:
 		- $q_\pi(s,a) = \mathbb{E}[G_t \mid S_t = s, A_t = a] = \mathbb{E}[R_{t+1} + \gamma G_{t+1} \mid S_t = s, A_t = a]$
 		- $q_\pi(s,a)$ = Action value
 - **Bellman Equations:**
-	- **Bellman equations for state value:**
-		 - $\mathbb{E}[G_{t+1} \mid S_{t+1} = s'] = v_\pi(s')$ by definition. So: $\boxed{v_\pi(s) = \sum_a \pi(a \mid s) \sum_{s', r} p(s', r \mid s, a)\Big[r + \gamma v_\pi(s')\Big]}$
-	- **Bellman equations for action value:**
-		- $\boxed{q_\pi(s,a) = \sum_{s',r} p(s',r \mid s,a)\left[r + \gamma \sum_{a'} \pi(a' \mid s') q_\pi(s', a')\right]}$
-	- Bellman optimality equations:
-	![[Pasted image 20261101162440.png]]
+	- **Bellman equations:*
+		 - $$\boxed{v_\pi(s) = \sum_a \pi(a \mid s) \sum_{s', r} p(s', r \mid s, a)\Big[r + \gamma\, v_\pi(s')\Big]}$$
+		- $$q_\pi(s,a) = \sum_{s',r} p(s', r \mid s, a)\big[r + \gamma\, v_\pi(s')\big]$$
+	- **Bellman optimality equations:**
+		- $$\boxed{v_*(s) = \max_a \sum_{s', r} p(s', r \mid s, a)\Big[r + \gamma\, v_*(s')\Big]  = \max_a q(s,a)}$$
+		- $$q(s,a) = \sum_{s',r} p\,[r + \gamma v(s')]$$
+
+| Symbol               | Meaning (simple)                                                                         | Who decides it     |
+| -------------------- | ---------------------------------------------------------------------------------------- | ------------------ |
+| $s$                  | Current state (where I am)                                                               | -                  |
+| $a$                  | An action I can take                                                                     | Agent              |
+| $s'$                 | Next state (where I land after the action)                                               | Environment        |
+| $r$                  | Reward I get on this step (a normal number like +1, −1, +10)                             | Environment        |
+| $\gamma$             | Discount factor (0 to 1): future reward is worth a bit less                              | Us (design choice) |
+| $\pi(a \mid s)$      | Policy: probability that I choose action $a$ in state $s$                                | **Agent**          |
+| $p(s', r \mid s, a)$ | Model: probability I land in $s'$ and get reward $r$, **given** I was in $s$ and did $a$ | **Environment**    |
+| $v_\pi(s)$           | State value: average total reward (Return) from $s$ if I follow $\pi$                    | Computed           |
+| $q_\pi(s,a)$         | Action value (Q value): average Return if I do $a$ in $s$, then follow $\pi$             | Computed           |
+| $\sum_a$             | "for every action" (a for loop)                                                          | -                  |
+| $\sum_{s',r}$        | "for every result that can happen after this action" (a for loop)                        | -                  |
+
+
 - **Exploration vs Exploitation**
 	- Should the agent try new actions to learn (explore) or use its current best action to get reward (exploit)?
 	- Analogy: Trying a new route in a race (maybe faster) vs sticking to the route that already works.

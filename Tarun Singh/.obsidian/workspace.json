@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "baa5294d027498b7",
+        "id": "ca7b4e637851c340",
         "type": "tabs",
         "children": [
           {
-            "id": "a6b9fc5f6e9ce571",
+            "id": "88101c28bf84b06e",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Reinforcement Learning/Reinforcement-Learning-Basics.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Reinforcement-Learning-Basics"
             }
           }
         ]
@@ -183,13 +187,14 @@
       "bases:Create new base": false
     }
   },
-  "active": "a6b9fc5f6e9ce571",
+  "active": "88101c28bf84b06e",
   "lastOpenFiles": [
-    "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
-    "Machine Learning/Cheat-Sheet/sedEJUiDT",
-    "Reinforcement Learning/RL- Dynamic Programming.md",
     "Reinforcement Learning/Gym Library.md",
     "Reinforcement Learning/Reinforcement-Learning-Basics.md",
+    "Reinforcement Learning/RL- Dynamic Programming.md",
+    "Maths For Data Science/Probability.md",
+    "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
+    "Machine Learning/Cheat-Sheet/sedEJUiDT",
     "AWS/Billing And Cost Management.md",
     "AWS/IAM.md",
     "AWS/AWS Basis.md",
