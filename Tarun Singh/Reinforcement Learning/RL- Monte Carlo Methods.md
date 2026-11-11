@@ -434,7 +434,11 @@ import random
 env = gym.make('FrozenLake-v1', map_name="4x4", is_slippery=True, render_mode="rgb_array")
 
 discount_factor = 0.9
+num_episodes = 1000000
 epsilon = 1.0
+epsilon_min = 0.05
+# epsilon reaches epsilon_min at 80% of training, then stays there
+epsilon_step = (epsilon - epsilon_min) / (0.8 * num_episodes)
 n_table = []
 q_table = []
 for state_i in range(env.observation_space.n):
@@ -459,10 +463,10 @@ def greedy_action(q_row):
 
 episode_num = 0
 
-while(episode_num < 1000000):
+while(episode_num < num_episodes):
     episode_num += 1
-    if epsilon > 0.05:
-        epsilon -= 5e-7
+    if epsilon > epsilon_min:
+        epsilon -= epsilon_step
     # starting a episode
     episode = [] # each time epiode reste to []
     # run until the episode ends
@@ -536,5 +540,145 @@ for _ in range(episodes):
                 success_count += 1
 success_rate = success_count / episodes
 print(f"Success rate: {success_rate:.2%}")   # Success rate: 73.30%
+env.close()
+```
+
+### On-policy MC - Taxi
+
+- **My understanding of env**
+	- The Taxi Problem involves navigating to passengers in a grid world, picking them up and dropping them off at one of four locations.
+	- There are four designated pick-up and drop-off locations (Red, Green, Yellow and Blue). The taxi starts off at a random square and the passenger at one of the designated locations.
+	- Action
+		- 0: Move south (down)
+		- 1: Move north (up)
+		- 2: Move east (right)
+		- 3: Move west (left)
+		- 4: Pickup passenger
+		- 5: Drop off passenger
+	- observation: 500 discrete states
+	- Passenger locations: 0: Red, 1: Green, 2: Yellow, 3: Blue, 4: In taxi
+	- Destinations: 0: Red, 1: Green, 2: Yellow, 3: Blue
+	- Reward:
+		- -1 per step unless another reward is triggered.
+		- +20 delivering passenger.
+		- -10 executing "pickup" and "drop-off" actions illegally.
+- **Type:** on-policy first-visit MC control (same code as FrozenLake, only env, γ and ε schedule changed)
+- **Result:** Success rate **~85-88%** (success = last reward is +20)
+- **What made it work (was 0% before)**
+	- **ε schedule:** old step 5e-7 × 100,000 episodes → ε ended at 0.95 = almost random the whole time. Now step = (1.0 − 0.05) / (0.8 × episodes) → ε reaches 0.05 at 80% of training
+	- **γ = 0.99 instead of 0.9:** +20 comes many steps later, with 0.9 it shrinks too much and the agent can't "see" it (0.9 → ~35%, 0.99 → ~86%)
+	- **Why not 100%:** 1/n keeps the bad G's from the early random episodes in the average forever. Fix ideas: constant α (Doubt 1) or TD / Q-learning (next section)
+
+```python
+import gymnasium as gym
+import random
+env = gym.make('Taxi-v4', render_mode="rgb_array")
+
+discount_factor = 0.99 # taxi goal is far (many steps), so future reward must matter more
+num_episodes = 100000
+epsilon = 1.0
+epsilon_min = 0.05
+# epsilon reaches epsilon_min at 80% of training, then stays there
+epsilon_step = (epsilon - epsilon_min) / (0.8 * num_episodes)
+n_table = []
+q_table = []
+for state_i in range(env.observation_space.n):
+    q_row, n_row = [], []
+    for action_j in range(env.action_space.n):
+        q_row.append(None) # for q value table
+        n_row.append(0) # for n table
+    n_table.append(n_row)
+    q_table.append(q_row)
+
+def greedy_action(q_row):
+    max_q = float('-inf')
+    num_actions = len(q_row)
+    best_action = 0
+    for a in range(num_actions):
+        if q_row[a] is not None and max_q < q_row[a]:
+            max_q = q_row[a]
+            best_action = a
+    if max_q == float('-inf'):
+        return random.randint(0, num_actions-1) # this will only happen for the first time taht complete row is None
+    return best_action
+
+episode_num = 0
+
+while(episode_num < num_episodes):
+    episode_num += 1
+    if epsilon > epsilon_min:
+        epsilon -= epsilon_step
+    # starting a episode
+    episode = [] # each time epiode reste to []
+    # run until the episode ends
+    state, info = env.reset()
+    while(True):
+        episode.append(state)
+        p_random = random.random()
+        if p_random > epsilon:
+            action = greedy_action(q_table[state])
+            # go with exploite ok
+        else:
+            action = random.randint(0, env.action_space.n-1)
+            # go with explore action
+
+        episode.append(action)
+        # now we will take the action
+        state, reward, terminated, truncated, info = env.step(action)
+
+        episode.append(reward)
+
+        if terminated or truncated:
+            break
+
+    # now the epiode is over we will calucate the G for each sate ok
+    # epiose will be like s0-a0-r1-s1-a1-r2
+
+    episode_len = len(episode)
+    first_visit_G = {}
+    idx = episode_len-1
+    G_next = 0
+    while(idx >= 0):
+        state_action = ( episode[idx-2], episode[idx-1] )
+        reward = episode[idx]
+        idx -= 3
+        G = reward + discount_factor*G_next
+        first_visit_G[state_action] = G
+        G_next = G
+
+    # now updating the n matrics and q value matrics
+    for key, G_value in first_visit_G.items():
+        state_now , action_now = key
+        n_table[state_now][action_now] += 1
+        q_old = q_table[state_now][action_now]
+        if q_old == None:
+            q_old = 0
+        q_new = q_old + (G_value-q_old)/n_table[state_now][action_now]
+        q_table[state_now][action_now] = q_new
+
+    # no need to update policy, as we have no policy amtrics
+    # the function greedy_action will action need to taken if we want max q_value
+
+# now generate policy
+policy = []
+for state_i in range(env.observation_space.n):
+    policy.append(greedy_action(q_table[state_i]))
+
+# test: success rate (pure greedy, no ε)
+success_count = 0
+episodes = 1000
+for _ in range(episodes):
+    state, info = env.reset()
+    done = False
+    while not done:
+        action = policy[state]
+        next_state, reward, terminated, truncated, info = env.step(action)
+        state = next_state
+        if terminated or truncated:
+            done = True
+            if reward == 20:
+                success_count += 1
+success_rate = success_count / episodes
+print(f"Success rate: {success_rate:.2%}")   # Success rate: ~85-88%
 env.close()
 ```

@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "ed0c9888374b06a2",
+        "id": "1f617334a8e706c1",
         "type": "tabs",
         "children": [
           {
-            "id": "a32ecc4c76aec67d",
+            "id": "ff5b16b4ba9e7ee1",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
                 "file": "Reinforcement Learning/RL- Monte Carlo Methods.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
@@ -80,8 +80,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 324.5,
-    "collapsed": true
+    "width": 324.5
   },
   "right": {
     "id": "eeaa25e87f210d6a",
@@ -187,10 +186,10 @@
       "bases:Create new base": false
     }
   },
-  "active": "a32ecc4c76aec67d",
+  "active": "ff5b16b4ba9e7ee1",
   "lastOpenFiles": [
-    "Reinforcement Learning/Gym Library.md",
     "Reinforcement Learning/RL- Monte Carlo Methods.md",
+    "Reinforcement Learning/Gym Library.md",
     "Reinforcement Learning/Exploration vs Exploitation.md",
     "Reinforcement Learning/Reinforcement-Learning-Basics.md",
     "Reinforcement Learning/RL- Dynamic Programming.md",
