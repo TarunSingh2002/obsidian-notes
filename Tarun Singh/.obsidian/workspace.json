@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "ca7b4e637851c340",
+        "id": "ed0c9888374b06a2",
         "type": "tabs",
         "children": [
           {
-            "id": "88101c28bf84b06e",
+            "id": "a32ecc4c76aec67d",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Reinforcement Learning/Reinforcement-Learning-Basics.md",
+                "file": "Reinforcement Learning/RL- Monte Carlo Methods.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Reinforcement-Learning-Basics"
+              "title": "RL- Monte Carlo Methods"
             }
           }
         ]
@@ -187,9 +187,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "88101c28bf84b06e",
+  "active": "a32ecc4c76aec67d",
   "lastOpenFiles": [
     "Reinforcement Learning/Gym Library.md",
+    "Reinforcement Learning/RL- Monte Carlo Methods.md",
+    "Reinforcement Learning/Exploration vs Exploitation.md",
     "Reinforcement Learning/Reinforcement-Learning-Basics.md",
     "Reinforcement Learning/RL- Dynamic Programming.md",
     "Maths For Data Science/Probability.md",
@@ -200,7 +202,6 @@
     "AWS/AWS Basis.md",
     "AWS/Amazon EC2.md",
     "Reinforcement Learning/Tic-Tac-Toe.md",
-    "Reinforcement Learning/Exploration vs Exploitation.md",
     "Attachments/Pasted image 20261101162440.png",
     "Deep Learning/Making a Transformer from Scratch with PyTorch.md",
     "Deep Learning/CheatSheet-Tensorflow.md",
@@ -224,7 +225,6 @@
     "Deep Learning",
     "CheatSheet-Tensorflow",
     "Machine Learning/Theory/Algos/Decision Tree.md",
-    "Machine Learning/Theory/Algos/Ensemble Learning.md",
     "Attachments/Pasted image 20260720025005.png",
     "Attachments/Pasted image 20260720024829.png",
     "Attachments/Pasted image 20260717010755.png",
