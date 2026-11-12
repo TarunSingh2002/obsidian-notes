@@ -263,6 +263,165 @@
 
 ---
 
+## **Off-policy MC**
+
+### **Part 1: The story (what "off-policy" means)**
+
+- **On-policy** (what we did above)
+	- There is **one** policy: ε-greedy
+	- It **plays** the game, AND the G's from its games **update Q**
+	- So Q = "how good is this action if I keep playing **ε-greedy** (with random moves) after it"
+- **Off-policy**
+	- There are **two** policies with two different jobs
+	- **Behavior policy b** → its job is to **play** the game. It explores (ε-greedy, sometimes random moves)
+	- **Target policy π** → its job is to be **learned**. It is pure greedy: always the max of the Q row, **never** random
+	- So Q = "how good is this action if I play **perfectly greedy** after it"
+- **Story:** you want to learn how a **perfect driver** (π) drives. But the only person driving is a **learner** (b) who mostly drives correctly and sometimes does random things. You watch the learner and only learn from the parts where they drove like the perfect driver.
+
+### **Part 2: Why do we even want this?**
+- That's because on-policy Q includes the random moves. The value it learns is for a "sometimes random" player
+
+### **Part 3: Which G's can we use? (the most important part)**
+
+- Remember the meaning of Q(s, a): "do action **a** now, then **follow the policy** after it"
+- So for off-policy: **a itself can be anything**, but **every action AFTER it must be what π (greedy) would do**
+- Going backward through an episode:
+	- If all later actions were greedy → this G is a valid "greedy" G → **use it**
+	- If any later action was random (non-greedy) → this G contains a move π would never make → **can't use it**
+- That's why we go **backward** and **stop (break)** at the first non-greedy action: everything before it has a random move "after" it
+
+### **Part 4: The weight W (importance sampling), in simple words**
+
+- Even the valid G's need a small correction, called **importance sampling**
+- **Why:** b and π don't choose actions with the same probability
+	- π (greedy) picks the greedy action **100%** of the time
+	- b (ε-greedy, ε = 0.1, 4 actions) picks the greedy action only **92.5%** of the time
+	- So the "all greedy" paths show up **less often** with b than they would with π
+	- To make up for it, each valid G is counted a bit **more**: multiply by $\frac{\pi(a \mid s)}{b(a \mid s)} = \frac{1}{0.925} = 1.081$ for every greedy step after it
+- **W** = the product of all those corrections for the steps **after** (s, a)
+	- 1 greedy step after → W = 1.081
+	- 2 greedy steps after → W = 1.081 × 1.081 = 1.169
+	- a random step after → π(a|s) = 0 → W = 0 → useless → that's the **break**
+- **Simple coin example**
+	- Your friend's coin always lands Heads (π). Your coin lands Heads 92.5% (b)
+	- You can only flip your coin. To learn about your friend's coin, you only keep the Heads flips, and each kept flip counts as 1/0.925 = 1.081 flips, because Heads is a bit rare for you compared to your friend
+
+### **Part 6: The update (C replaces n)**
+
+- Before (on-policy): n = how many G's we saw, and $Q = Q + \frac{1}{n}(G - Q)$
+- Now every G has a weight W, so instead of counting G's we **add up their weights**:
+	- $C(s,a) = C(s,a) + W$ → C = "total weight seen so far" (the weighted version of n)
+	- $Q(s,a) = Q(s,a) + \frac{W}{C(s,a)}\,(G - Q(s,a))$ → a **weighted average** of the G's
+- Check: if every W = 1, then C goes 1, 2, 3 ... = n, so this is exactly the old $\frac{1}{n}$ formula
+- First time a pair is updated: C = 0 + W = W, so $\frac{W}{C} = 1$ → Q = G (same as n = 1 before)
+- Like before, we keep a **C table** the same size as the Q table (instead of the N table)
+
+### **Part 7: The steps (after one episode, go backward)**
+
+- Start: G = 0, W = 1
+- For each step from the **last** to the **first**:
+	- **Step 1:** $G = R_{t+1} + \gamma\, G$ (same as before)
+	- **Step 2:** update C and Q for (s, a) using the current W
+	- **Step 3:** was a the greedy action (max of the Q row)? If **no** → **break** (stop, earlier steps get nothing)
+	- **Step 4:** if yes → $W = W \times \frac{1}{b(a \mid s)}$ (for ε-greedy: $\frac{1}{0.925}$)
+- **Why Step 2 comes before Step 3:** the action at this step can be anything (Part 4). Only actions **after** it matter. So a random step **is** updated itself, it just blocks the steps **before** it
+
+### **Part 8: Example 1 by hand (episode WITH a random move)**
+
+- Same maze, −1 per step, γ = 0.9
+- **b** = ε-greedy, ε = 0.1, 4 actions → greedy action: $0.9 + \frac{0.1}{4} = 0.925$, other actions: $\frac{0.1}{4} = 0.025$
+- **π** = greedy = **Right** in every state (from the current Q table)
+- Q and C tables start at 0
+- **Episode:** A →Right→ B →**Down (random)**→ D →Right→ B →Right→ C →Right→ Goal
+
+| t | State | Action | Reward | Greedy? |
+| --- | --- | --- | --- | --- |
+| 0 | A | Right | −1 | ✅ |
+| 1 | B | Down (random) | −1 | ❌ |
+| 2 | D | Right | −1 | ✅ |
+| 3 | B | Right | −1 | ✅ |
+| 4 | C | Right | −1 (reaches Goal) | ✅ |
+
+- **Going backward, start G = 0, W = 1**
+- **t = 4, (C, Right)**
+	- Step 1: G = −1 + 0.9 × 0 = **−1**
+	- Step 2: C = 0 + 1 = 1 → Q = $0 + \frac{1}{1}(-1 - 0)$ = **−1**
+	- Step 3: Right is greedy ✅ → continue
+	- Step 4: W = 1 × $\frac{1}{0.925}$ = **1.081**
+- **t = 3, (B, Right)**
+	- Step 1: G = −1 + 0.9 × (−1) = **−1.9**
+	- Step 2: C = 0 + 1.081 = 1.081 → Q = $0 + \frac{1.081}{1.081}(-1.9 - 0)$ = **−1.9**
+	- Step 3: Right is greedy ✅ → continue
+	- Step 4: W = 1.081 × $\frac{1}{0.925}$ = **1.169**
+- **t = 2, (D, Right)**
+	- Step 1: G = −1 + 0.9 × (−1.9) = **−2.71**
+	- Step 2: C = 0 + 1.169 = 1.169 → Q = $0 + \frac{1.169}{1.169}(-2.71 - 0)$ = **−2.71**
+	- Step 3: Right is greedy ✅ → continue
+	- Step 4: W = 1.169 × $\frac{1}{0.925}$ = **1.264**
+- **t = 1, (B, Down)**
+	- Step 1: G = −1 + 0.9 × (−2.71) = **−3.439**
+	- Step 2: C = 0 + 1.264 = 1.264 → Q = $0 + \frac{1.264}{1.264}(-3.439 - 0)$ = **−3.439** (updated! the action itself can be random)
+	- Step 3: Down is **not** greedy ❌ → **break**
+- **t = 0, (A, Right)** → **not updated**
+- **⭐ Why is (A, Right) not updated?**
+	- Q(A, Right) should mean "go Right from A, then play greedy"
+	- But after A → Right, this episode went **Down at B** (random). Greedy would never do that
+	- So this G is not a "greedy" G → skip it
+	- In on-policy, this exact case made Q(A, Right) drop. Off-policy keeps it clean ✅
+
+### **Part 9: Example 2 by hand (C adding up)**
+
+- Next episode. Q and C now have values from Example 1
+- **Episode:** A →**Down (random)**→ D →Right→ B →Right→ C →Right→ Goal
+- **Going backward, start G = 0, W = 1**
+- **t = 3, (C, Right)**
+	- Step 1: G = **−1**
+	- Step 2: C = 1 + 1 = 2 → Q = $-1 + \frac{1}{2}(-1 - (-1))$ = **−1** (same)
+	- Step 3: greedy ✅ → Step 4: W = **1.081**
+- **t = 2, (B, Right)**
+	- Step 1: G = **−1.9**
+	- Step 2: C = 1.081 + 1.081 = 2.162 → Q = $-1.9 + \frac{1.081}{2.162}(-1.9 - (-1.9))$ = **−1.9** (same)
+	- Step 3: greedy ✅ → Step 4: W = **1.169**
+- **t = 1, (D, Right)**
+	- Step 1: G = **−2.71**
+	- Step 2: C = 1.169 + 1.169 = 2.338 → Q = $-2.71 + \frac{1.169}{2.338}(0)$ = **−2.71** (same)
+	- Step 3: greedy ✅ → Step 4: W = **1.264**
+- **t = 0, (A, Down)**
+	- Step 1: G = −1 + 0.9 × (−2.71) = **−3.439**
+	- Step 2: C = 0 + 1.264 = 1.264 → Q = **−3.439** (first time)
+	- Step 3: Down is not greedy ❌ → break (it was the first step anyway)
+- **Q after 2 episodes**
+
+| Q table | Right | Down | Left | Up |
+| --- | --- | --- | --- | --- |
+| A | 0 (not learned yet) | −3.439 | 0 | 0 |
+| B | −1.9 | −3.439 | 0 | 0 |
+| C | −1 | 0 | 0 | 0 |
+| D | −2.71 | 0 | 0 | 0 |
+
+- Values didn't change in the second visit because this maze is not slippery (the same moves always give the same G). In a slippery game, G changes every time, and W/C decides how much each new G moves Q
+- Notice A → Right is still not learned. It needs an episode where **everything after A → Right** is greedy. This is the "slow" problem of off-policy MC
+
+### **Part 10: Pros and cons**
+
+- ✅ Q learns the **best (greedy)** policy, not polluted by random moves
+- ✅ The agent can explore as much as it wants while playing
+- ❌ Every random move = break → states near the **start** get updated **rarely** → learns slowly
+- ❌ W can get big (a random action has b = 0.025, 1/0.025 = 40), so values can jump around in some versions
+- **Q-learning** (next section, TD) is the same off-policy idea done much better: no weights, no break
+
+### **Quick summary**
+
+| | On-policy MC | Off-policy MC |
+| --- | --- | --- |
+| Policies | 1 (ε-greedy plays and learns) | 2 (b plays, π greedy learns) |
+| Q means | value of ε-greedy player | value of greedy player |
+| Counter | N table (count) | C table (sum of weights W) |
+| Update | $\frac{1}{n}(G - Q)$ | $\frac{W}{C}(G - Q)$ |
+| Random move in episode | used normally | break: earlier steps skipped |
+
+---
+
 ## **MC vs DP**
 
 | | Dynamic Programming | Monte Carlo |

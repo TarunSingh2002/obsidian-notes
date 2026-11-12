@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "1f617334a8e706c1",
+        "id": "7c1e885c97d0cf03",
         "type": "tabs",
         "children": [
           {
-            "id": "ff5b16b4ba9e7ee1",
+            "id": "d6f977d435c1af1f",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
                 "file": "Reinforcement Learning/RL- Monte Carlo Methods.md",
-                "mode": "preview",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
@@ -80,7 +80,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 324.5
+    "width": 324.5,
+    "collapsed": true
   },
   "right": {
     "id": "eeaa25e87f210d6a",
@@ -186,13 +187,13 @@
       "bases:Create new base": false
     }
   },
-  "active": "ff5b16b4ba9e7ee1",
+  "active": "d6f977d435c1af1f",
   "lastOpenFiles": [
+    "Reinforcement Learning/RL- Dynamic Programming.md",
     "Reinforcement Learning/RL- Monte Carlo Methods.md",
     "Reinforcement Learning/Gym Library.md",
     "Reinforcement Learning/Exploration vs Exploitation.md",
     "Reinforcement Learning/Reinforcement-Learning-Basics.md",
-    "Reinforcement Learning/RL- Dynamic Programming.md",
     "Maths For Data Science/Probability.md",
     "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
     "Machine Learning/Cheat-Sheet/sedEJUiDT",
