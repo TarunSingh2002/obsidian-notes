@@ -2,6 +2,8 @@
 tags:
   - machineLearning
   - Algo
+  - classification
+  - logistic-regression
 ---
 ## Basics 
 - Classification Algo

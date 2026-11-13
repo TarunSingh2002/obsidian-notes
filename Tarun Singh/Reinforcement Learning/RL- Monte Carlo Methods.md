@@ -1,3 +1,8 @@
+---
+tags:
+  - ReinforcementLearning
+  - monte-carlo
+---
 - This is a family of methods that learn the optimal state-values or q-values based on samples of experience collected by the agent while interacting with the environment.
 - **Big difference from DP:** DP needed the rules table $p(s', r \mid s, a)$ (`env.unwrapped.P`). Monte Carlo (MC) does **not**. It just **plays** the game and learns from what happened.
 - how

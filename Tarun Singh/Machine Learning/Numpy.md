@@ -1,3 +1,9 @@
+---
+tags:
+  - machineLearning
+  - python
+  - numpy
+---
 # Numpy
 
 ## Definition

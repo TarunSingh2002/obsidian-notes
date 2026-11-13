@@ -2,6 +2,7 @@
 tags:
   - machineLearning
   - MathsForDataScience
+  - statistics
 ---
 ## Basics about Statistics
 

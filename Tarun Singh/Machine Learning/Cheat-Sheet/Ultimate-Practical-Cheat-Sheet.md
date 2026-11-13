@@ -1,3 +1,8 @@
+---
+tags:
+  - machineLearning
+  - cheatSheet
+---
 
 ### Basics
 #### basic setup

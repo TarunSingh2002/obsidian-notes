@@ -1,6 +1,8 @@
 ---
 tags:
   - MLOps
+  - dvc
+  - data-versioning
 ---
 ## Basics And Important Points
 - It's like Git, but for **data files, models, and experiments**. Git is bad at tracking huge files (CSVs, images, model weights). DVC solves this — it tracks _where_ your data is, while Git tracks _what changed_.

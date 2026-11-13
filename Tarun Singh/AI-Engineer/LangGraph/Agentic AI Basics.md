@@ -1,6 +1,8 @@
 ---
 tags:
   - AIEngineer
+  - langgraph
+  - agentic-ai
 ---
 
 ## Agentic AI Key Characteristics

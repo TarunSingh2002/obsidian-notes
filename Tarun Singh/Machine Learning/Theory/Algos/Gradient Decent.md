@@ -2,6 +2,8 @@
 tags:
   - machineLearning
   - Algo
+  - gradient-descent
+  - optimization
 ---
 ## Gradient Descent
 - It is a optimizing technique

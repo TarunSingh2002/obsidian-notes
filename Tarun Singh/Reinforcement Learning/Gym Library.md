@@ -1,3 +1,8 @@
+---
+tags:
+  - ReinforcementLearning
+  - gym
+---
 - **What is Gym?**
 	- A Python library that gives us ready-made **environments** (games / tasks) to practice RL on.
 	- Every environment talks to the agent in the **same way**, so once you learn the 5 basic methods you can use any environment.

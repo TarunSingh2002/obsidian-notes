@@ -1,3 +1,9 @@
+---
+tags:
+  - AWS
+  - cloud
+  - ec2
+---
 ### EC2 Basics
 * EC2 = Elastic Compute Cloud = IaaS (Infrastructure as a Service)
 * EC2 is not 1 single service, it's a family:

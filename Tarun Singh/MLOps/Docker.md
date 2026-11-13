@@ -1,3 +1,9 @@
+---
+tags:
+  - MLOps
+  - docker
+  - containers
+---
 # Docker
 
 ## How Docker Works

@@ -1,3 +1,8 @@
+---
+tags:
+  - python
+  - logging
+---
 ## Basics
 - Logging = your program writing a **diary** of everything that happens while it runs
 - Timestamps on every message

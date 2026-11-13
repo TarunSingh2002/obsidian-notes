@@ -1,3 +1,9 @@
+---
+tags:
+  - database
+  - sql
+  - cheatSheet
+---
 # SQL Cheat Sheet
 
 ## Types of Joins

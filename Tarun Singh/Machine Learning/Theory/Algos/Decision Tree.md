@@ -2,6 +2,7 @@
 tags:
   - Algo
   - machineLearning
+  - decision-tree
 ---
 ## Basics 
 - Giant structure of nested if-else condition

@@ -1,6 +1,7 @@
 ---
 tags:
   - machineLearning
+  - basics
 ---
 ## Types
 - Type 1

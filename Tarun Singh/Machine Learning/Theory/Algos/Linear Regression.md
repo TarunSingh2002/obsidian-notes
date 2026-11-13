@@ -2,6 +2,8 @@
 tags:
   - machineLearning
   - Algo
+  - regression
+  - linear-regression
 ---
 ## Basics
 - Types

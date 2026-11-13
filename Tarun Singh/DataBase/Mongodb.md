@@ -1,3 +1,10 @@
+---
+tags:
+  - database
+  - mongodb
+  - nosql
+  - pymongo
+---
 ### Links
 - [Documentation](https://www.mongodb.com/docs/)
 - [Tutorial Playlist](https://youtube.com/playlist?list=PLd3UqWTnYXOlzZmysFvd13g7W23voyuK9&si=UbMxpe6a-vGCNVvA)

@@ -2,6 +2,7 @@
 tags:
   - AIEngineer
   - workflow
+  - langgraph
 ---
 
 ## Sequential Workflows

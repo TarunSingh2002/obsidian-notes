@@ -2,6 +2,8 @@
 tags:
   - machineLearning
   - Algo
+  - classification
+  - naive-bayes
 ---
 ## Difference between Multinomial Naive Bayes and Categorical Naive Bayes
 

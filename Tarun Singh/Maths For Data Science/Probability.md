@@ -2,6 +2,7 @@
 tags:
   - machineLearning
   - MathsForDataScience
+  - probability
 ---
 ## Simple Probability
 - P(A) = 0.3 -> 30 % chance

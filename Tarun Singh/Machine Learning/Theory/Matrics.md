@@ -1,6 +1,7 @@
 ---
 tags:
   - machineLearning
+  - metrics
 ---
 ## Types 
 - Classification Metrics

@@ -2,6 +2,7 @@
 tags:
   - Algo
   - machineLearning
+  - ensemble
 ---
 ## Basics
 - Type

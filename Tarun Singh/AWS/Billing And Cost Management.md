@@ -1,3 +1,9 @@
+---
+tags:
+  - AWS
+  - cloud
+  - billing
+---
 
 ### How To give IAM User Access of Billing info
 - In root account -> Billing and cost management -> Account -> IAM user and role access to Billing information -> Edit -> Activate 

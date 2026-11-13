@@ -1,3 +1,9 @@
+---
+tags:
+  - AWS
+  - cloud
+  - global-infrastructure
+---
 ### AWS Global Infrastructure
 - AWS Regions
 	- Named like us-east-1 eu-west-3

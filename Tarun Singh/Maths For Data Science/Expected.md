@@ -1,3 +1,9 @@
+---
+tags:
+  - MathsForDataScience
+  - probability
+  - expected-value
+---
 - Expected value of something X is written as
 	- $\mathbb{E}[X] = \sum_{\text{all outcomes}} x \cdot P(X = x)$ 
 - Example: 

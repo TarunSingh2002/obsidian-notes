@@ -1,3 +1,9 @@
+---
+tags:
+  - machineLearning
+  - python
+  - pandas
+---
 
 ## Create a DataFrame
 ```python

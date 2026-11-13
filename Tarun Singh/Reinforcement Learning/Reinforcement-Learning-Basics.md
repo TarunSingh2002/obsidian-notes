@@ -1,6 +1,7 @@
 ---
 tags:
   - ReinforcementLearning
+  - basics
 ---
 ## Basics About Reinforcement Learning 
 - RL used to solve a **controlled tasks**

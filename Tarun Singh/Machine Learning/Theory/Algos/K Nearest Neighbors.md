@@ -1,3 +1,9 @@
+---
+tags:
+  - machineLearning
+  - Algo
+  - knn
+---
 
 ## Intuition 
 - can be applicable for nd data

@@ -1,6 +1,7 @@
 ---
 tags:
   - ReinforcementLearning
+  - dynamic-programming
 ---
 ## Bellman Equation + Dynamic Programming (apply-first version)
 

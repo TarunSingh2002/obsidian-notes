@@ -1,3 +1,10 @@
+---
+tags:
+  - machineLearning
+  - Algo
+  - clustering
+  - unsupervised
+---
 
 ## Working
 - Here k mean = Number of cluster

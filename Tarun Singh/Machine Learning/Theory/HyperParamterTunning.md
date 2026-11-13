@@ -1,6 +1,7 @@
 ---
 tags:
   - machineLearning
+  - hyperparameter-tuning
 ---
 ### Types
 - Optuna

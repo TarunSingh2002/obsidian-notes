@@ -1,3 +1,9 @@
+---
+tags:
+  - machineLearning
+  - Algo
+  - svm
+---
 ## SVM Classification
 
 - ![[Pasted image 20260504091529.png]]

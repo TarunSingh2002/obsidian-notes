@@ -1,3 +1,10 @@
+---
+tags:
+  - AWS
+  - cloud
+  - iam
+  - security
+---
 ### IAM Basics
 - IAM = Identity and access management,
 - Global service

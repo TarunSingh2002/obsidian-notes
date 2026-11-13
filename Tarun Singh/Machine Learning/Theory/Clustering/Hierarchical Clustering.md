@@ -1,3 +1,10 @@
+---
+tags:
+  - machineLearning
+  - Algo
+  - clustering
+  - unsupervised
+---
 - Types
 	- Agglomerative clustering
 	- Divisive clustering
