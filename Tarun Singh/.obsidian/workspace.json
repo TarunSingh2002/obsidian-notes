@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "542a6feec854254d",
+        "id": "9b8f6f87715c4809",
         "type": "tabs",
         "children": [
           {
-            "id": "a203ef5bbad3f92d",
+            "id": "02ac198701133023",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Data-Engineering/ApacheSpark/ApacheSpark.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "ApacheSpark"
+              "title": "New tab"
             }
           }
         ]
@@ -186,21 +182,27 @@
       "bases:Create new base": false
     }
   },
-  "active": "a203ef5bbad3f92d",
+  "active": "b50029a3adc285af",
   "lastOpenFiles": [
+    "Python/Cheat-Sheet-Python-Code.md",
+    "Machine Learning/Pandas.md",
+    "Machine Learning/Numpy.md",
+    "MLOps/Docker.md",
+    "Attachments/Docker - working.png",
+    "Attachments/Numpy - linspace.png",
+    "Attachments/Numpy - fancy indexing rows.png",
+    "Attachments/Numpy - ones.png",
+    "Attachments/Numpy - slice extract 1.png",
+    "Attachments/Numpy - index arr -1.png",
+    "Attachments/Numpy - slice all rows col 2.png",
+    "Attachments/Docker - engine.png",
+    "Attachments/Numpy - arange 5 16 1.png",
+    "Attachments/Numpy - stack input arrays.png",
+    "Untitled",
+    "DataBase/SQL.md",
     "Data-Engineering/ApacheSpark/ApacheSpark.md",
-    "Attachments/ApacheSpark - application master container.png",
-    "Attachments/ApacheSpark - architecture.png",
-    "Attachments/ApacheSpark - spark vs hadoop.png",
     "DataBase/Mongodb.md",
     "Data-Engineering",
-    "Attachments/MongoDB - aggregate match.png",
-    "Attachments/langchain-document-loaders-4.png",
-    "Attachments/MongoDB - pipeline sample document.png",
-    "Attachments/MongoDB - aggregate group push ROOT.png",
-    "Attachments/MongoDB - aggregate group push field.png",
-    "Attachments/MongoDB - update array element example.png",
-    "Attachments/MongoDB - all example.png",
     "AI-Engineer/LangGraph/Workflows.md",
     "Data-Engineering/ApacheSpark",
     "DataBase",
@@ -224,16 +226,10 @@
     "Reinforcement Learning/Exploration vs Exploitation.md",
     "Reinforcement Learning/Reinforcement-Learning-Basics.md",
     "Maths For Data Science/Probability.md",
-    "Machine Learning/Cheat-Sheet/Ultimate-Practical-Cheat-Sheet.md",
     "Machine Learning/Cheat-Sheet/sedEJUiDT",
-    "AWS/Billing And Cost Management.md",
-    "AWS/IAM.md",
-    "AWS/AWS Basis.md",
-    "AWS/Amazon EC2.md",
     "Machine Learning/Cheat-Sheet",
     "Machine Learning/Theory",
     "Machine Learning/EDA",
-    "Deep Learning",
     "Untitled.canvas"
   ]
 }
