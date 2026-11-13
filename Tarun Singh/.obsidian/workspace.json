@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "1e2f91d600cfd640",
+        "id": "542a6feec854254d",
         "type": "tabs",
         "children": [
           {
-            "id": "62c37e291106af13",
+            "id": "a203ef5bbad3f92d",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "DataBase/Mongodb.md",
-                "mode": "preview",
+                "file": "Data-Engineering/ApacheSpark/ApacheSpark.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Mongodb"
+              "title": "ApacheSpark"
             }
           }
         ]
@@ -186,18 +186,23 @@
       "bases:Create new base": false
     }
   },
-  "active": "62c37e291106af13",
+  "active": "a203ef5bbad3f92d",
   "lastOpenFiles": [
+    "Data-Engineering/ApacheSpark/ApacheSpark.md",
+    "Attachments/ApacheSpark - application master container.png",
+    "Attachments/ApacheSpark - architecture.png",
+    "Attachments/ApacheSpark - spark vs hadoop.png",
+    "DataBase/Mongodb.md",
+    "Data-Engineering",
     "Attachments/MongoDB - aggregate match.png",
     "Attachments/langchain-document-loaders-4.png",
-    "DataBase/Mongodb.md",
     "Attachments/MongoDB - pipeline sample document.png",
     "Attachments/MongoDB - aggregate group push ROOT.png",
     "Attachments/MongoDB - aggregate group push field.png",
     "Attachments/MongoDB - update array element example.png",
     "Attachments/MongoDB - all example.png",
     "AI-Engineer/LangGraph/Workflows.md",
-    "ApacheSpark",
+    "Data-Engineering/ApacheSpark",
     "DataBase",
     "AI-Engineer/LangGraph/Agentic AI Basics.md",
     "AI-Engineer/LangChain/LangChain.md",
@@ -211,9 +216,6 @@
     "AI-Engineer/LangChain/Runnables.md",
     "AI-Engineer/LangChain/Structured-Output.md",
     "AI-Engineer/LangChain/Models.md",
-    "Attachments/langchain-structured-output-2.png",
-    "Attachments/langchain-models-1.png",
-    "Attachments/langchain-runnables-3.png",
     "AI-Engineer/LangChain/attachments",
     "AI-Engineer/LangChain",
     "Reinforcement Learning/RL- Monte Carlo Methods.md",
@@ -232,7 +234,6 @@
     "Machine Learning/Theory",
     "Machine Learning/EDA",
     "Deep Learning",
-    "CheatSheet-Tensorflow",
     "Untitled.canvas"
   ]
 }
