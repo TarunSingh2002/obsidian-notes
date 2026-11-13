@@ -14,6 +14,7 @@ tags:
 
 1. Create a `.env` file.
 2. Store your API keys like this:
+
    ```plaintext
    MY_KEY=1234567890
 ```

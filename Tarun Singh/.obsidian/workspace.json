@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "ceb1947535d898ae",
+        "id": "1e2f91d600cfd640",
         "type": "tabs",
         "children": [
           {
-            "id": "11551c3ba709c3ee",
+            "id": "62c37e291106af13",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "AI-Engineer/LangChain/Chains.md",
-                "mode": "source",
+                "file": "DataBase/Mongodb.md",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Chains"
+              "title": "Mongodb"
             }
           }
         ]
@@ -186,27 +186,36 @@
       "bases:Create new base": false
     }
   },
-  "active": "11551c3ba709c3ee",
+  "active": "62c37e291106af13",
   "lastOpenFiles": [
-    "AI-Engineer/LangChain/Vector-Stores.md",
-    "AI-Engineer/LangChain/Chains.md",
-    "AI-Engineer/LangChain/Prompt-Template.md",
+    "Attachments/MongoDB - aggregate match.png",
+    "Attachments/langchain-document-loaders-4.png",
+    "DataBase/Mongodb.md",
+    "Attachments/MongoDB - pipeline sample document.png",
+    "Attachments/MongoDB - aggregate group push ROOT.png",
+    "Attachments/MongoDB - aggregate group push field.png",
+    "Attachments/MongoDB - update array element example.png",
+    "Attachments/MongoDB - all example.png",
+    "AI-Engineer/LangGraph/Workflows.md",
+    "ApacheSpark",
+    "DataBase",
+    "AI-Engineer/LangGraph/Agentic AI Basics.md",
+    "AI-Engineer/LangChain/LangChain.md",
     "AI-Engineer/LangChain/Document-Loaders.md",
+    "AI-Engineer/LangChain/Chains.md",
+    "AI-Engineer/LangChain/Vector-Stores.md",
+    "AI-Engineer/LangChain/Prompt-Template.md",
     "AI-Engineer/LangChain/RAG.md",
     "AI-Engineer/LangChain/Retrievers.md",
     "AI-Engineer/LangChain/Text-Splitters.md",
     "AI-Engineer/LangChain/Runnables.md",
     "AI-Engineer/LangChain/Structured-Output.md",
     "AI-Engineer/LangChain/Models.md",
-    "AI-Engineer/LangChain/LangChain.md",
-    "Attachments/langchain-document-loaders-4.png",
     "Attachments/langchain-structured-output-2.png",
     "Attachments/langchain-models-1.png",
     "Attachments/langchain-runnables-3.png",
     "AI-Engineer/LangChain/attachments",
-    "AI-Engineer/LangGraph/Workflows.md",
     "AI-Engineer/LangChain",
-    "AI-Engineer/LangGraph/Agentic AI Basics.md",
     "Reinforcement Learning/RL- Monte Carlo Methods.md",
     "Reinforcement Learning/RL- Dynamic Programming.md",
     "Reinforcement Learning/Gym Library.md",
@@ -219,21 +228,11 @@
     "AWS/IAM.md",
     "AWS/AWS Basis.md",
     "AWS/Amazon EC2.md",
-    "Reinforcement Learning/Tic-Tac-Toe.md",
-    "Attachments/Pasted image 20261101162440.png",
-    "Deep Learning/Making a Transformer from Scratch with PyTorch.md",
-    "Attachments/Pasted image 20260928124818.png",
-    "Attachments/Pasted image 20260928124807.png",
     "Machine Learning/Cheat-Sheet",
     "Machine Learning/Theory",
     "Machine Learning/EDA",
     "Deep Learning",
     "CheatSheet-Tensorflow",
-    "Attachments/Pasted image 20260720025005.png",
-    "Attachments/Pasted image 20260720024829.png",
-    "Attachments/Pasted image 20260717010755.png",
-    "AWS",
-    "AI-Engineer/LangGraph",
     "Untitled.canvas"
   ]
 }
