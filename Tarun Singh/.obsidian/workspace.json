@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "1011f3b0a6d3286d",
+        "id": "b7ab96f41719adf1",
         "type": "tabs",
         "children": [
           {
-            "id": "82c2e86fc8ef8ef5",
+            "id": "00e0307ed2de258c",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -182,16 +182,20 @@
       "bases:Create new base": false
     }
   },
-  "active": "82c2e86fc8ef8ef5",
+  "active": "00e0307ed2de258c",
   "lastOpenFiles": [
-    "Reinforcement Learning/Exploration vs Exploitation.md",
-    "Navigation/Home.md",
+    "Reinforcement Learning/Tic-Tac-Toe.md",
+    "Navigation/Reinforcement-Learning-Navigation.md",
     "Navigation/Python-Navigation.md",
+    "Navigation/NLP-Navigation.md",
+    "Navigation/MLOps-Navigation.md",
+    "Navigation/Machine-Learning-Navigation.md",
+    "Navigation/Home.md",
+    "Navigation/Deep-Learning-Navigation.md",
     "Navigation/Data-Navigation.md",
     "Navigation/AWS-Navigation.md",
-    "Navigation/MLOps-Navigation.md",
-    "Navigation/NLP-Navigation.md",
-    "Navigation/Deep-Learning-Navigation.md",
+    "Navigation/AI-Engineer-Navigation.md",
+    "Reinforcement Learning/Exploration vs Exploitation.md",
     "NLP/Intro to NLP.md",
     "Deep Learning/CheatSheet-PyTorch.md",
     "NLP/Text Representation.md",
@@ -219,12 +223,8 @@
     "Data-Engineering/ApacheSpark/ApacheSpark.md",
     "DataBase/Mongodb.md",
     "Data-Engineering",
-    "AI-Engineer/LangGraph/Workflows.md",
     "Data-Engineering/ApacheSpark",
     "DataBase",
-    "AI-Engineer/LangGraph/Agentic AI Basics.md",
-    "AI-Engineer/LangChain/LangChain.md",
-    "AI-Engineer/LangChain/Document-Loaders.md",
     "AI-Engineer/LangChain/attachments",
     "AI-Engineer/LangChain",
     "Machine Learning/Cheat-Sheet/sedEJUiDT",
