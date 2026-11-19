@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "8df77d1a5bd71a29",
+        "id": "7441831e111ff4b8",
         "type": "tabs",
         "children": [
           {
-            "id": "906baad948a75c15",
+            "id": "56f1b4fe2ebd4e3e",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "AI-Engineer/LangGraph/Persistence.md",
-                "mode": "preview",
+                "file": "AI-Engineer/LangGraph/Streaming.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Persistence"
+              "title": "Streaming"
             }
           }
         ]
@@ -187,12 +187,17 @@
       "bases:Create new base": false
     }
   },
-  "active": "906baad948a75c15",
+  "active": "56f1b4fe2ebd4e3e",
   "lastOpenFiles": [
-    "Python/Cheat-Sheet-Python-Code.md",
-    "AI-Engineer/LangChain/Prompt-Template.md",
     "AI-Engineer/LangGraph/WorkFlows.md",
     "AI-Engineer/LangGraph/Persistence.md",
+    "Python/Python yield & Generators.md",
+    "Python/Cheat-Sheet-Python-Code.md",
+    "AI-Engineer/LangGraph/Streaming.md",
+    "Python/Logger.md",
+    "Python/Async programming.md",
+    "AI-Engineer/LangGraph/Agentic AI Basics.md",
+    "AI-Engineer/LangChain/Prompt-Template.md",
     "AI-Engineer/LangGraph/Tarun_Singh.pdf",
     "AI-Engineer/LangGraph/Unconfirmed 91770.crdownload",
     "AI-Engineer/LangChain/Chains.md",
@@ -201,7 +206,6 @@
     "AI-Engineer/LangGraph/Gardrails.md",
     "AI-Engineer/LangGraph/Persistence in LangGraph  Time Travel in LangGraph  CampusX.txt",
     "AI-Engineer/LangGraph/Unconfirmed 231182.crdownload",
-    "AI-Engineer/LangGraph/Agentic AI Basics.md",
     "AI-Engineer/LangGraph/Workflows.md",
     "NLP/Intro to NLP.md",
     "NLP/NLP Course Roadmap.md",
@@ -215,9 +219,6 @@
     "AI-Engineer/LangChain/RAG.md",
     "AI-Engineer/LangChain/Models.md",
     "AI-Engineer/LangChain/Document-Loaders.md",
-    "Reinforcement Learning/Tic-Tac-Toe.md",
-    "Navigation/Reinforcement-Learning-Navigation.md",
-    "Navigation/Python-Navigation.md",
     "Attachments/NLP - imdb review dataset.png",
     "Attachments/NLP - bag of words example.png",
     "Attachments/NLP - ohe D1.png",
