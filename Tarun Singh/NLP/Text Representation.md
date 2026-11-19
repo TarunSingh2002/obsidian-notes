@@ -233,4 +233,4 @@ model = KeyedVectors.load_word2vec_format('GoogleNews-vectors-negative300.bin.gz
 ```
 
 ---
-- Previous: [[Text Pre-processing]]
+- Previous: [[Text Pre-processing]] · Next: [[Classical ML for NLP]]

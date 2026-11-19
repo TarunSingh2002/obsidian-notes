@@ -24,7 +24,7 @@ tags:
 | Topic              | Note-Link               |
 | ------------------ | ----------------------- |
 | Agentic AI Basics  | [[Agentic AI Basics]]   |
-| Workflows          | [[Workflows]]           |
+| Workflows          | [[WorkFlows]]           |
 
 ## To Do
 | Topic                         | Note-Link |

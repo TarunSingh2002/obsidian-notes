@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "b7ab96f41719adf1",
+        "id": "8df77d1a5bd71a29",
         "type": "tabs",
         "children": [
           {
-            "id": "00e0307ed2de258c",
+            "id": "906baad948a75c15",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "AI-Engineer/LangGraph/Persistence.md",
+                "mode": "preview",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Persistence"
             }
           }
         ]
@@ -76,7 +80,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 324.5
+    "width": 324.5,
+    "collapsed": true
   },
   "right": {
     "id": "eeaa25e87f210d6a",
@@ -182,36 +187,42 @@
       "bases:Create new base": false
     }
   },
-  "active": "00e0307ed2de258c",
+  "active": "906baad948a75c15",
   "lastOpenFiles": [
+    "Python/Cheat-Sheet-Python-Code.md",
+    "AI-Engineer/LangChain/Prompt-Template.md",
+    "AI-Engineer/LangGraph/WorkFlows.md",
+    "AI-Engineer/LangGraph/Persistence.md",
+    "AI-Engineer/LangGraph/Tarun_Singh.pdf",
+    "AI-Engineer/LangGraph/Unconfirmed 91770.crdownload",
+    "AI-Engineer/LangChain/Chains.md",
+    "AI-Engineer/LangChain/LangChain.md",
+    "AI-Engineer/LangGraph/Google ADK.md",
+    "AI-Engineer/LangGraph/Gardrails.md",
+    "AI-Engineer/LangGraph/Persistence in LangGraph  Time Travel in LangGraph  CampusX.txt",
+    "AI-Engineer/LangGraph/Unconfirmed 231182.crdownload",
+    "AI-Engineer/LangGraph/Agentic AI Basics.md",
+    "AI-Engineer/LangGraph/Workflows.md",
+    "NLP/Intro to NLP.md",
+    "NLP/NLP Course Roadmap.md",
+    "NLP/Classical ML for NLP.md",
+    "Deep Learning/CheatSheet-PyTorch.md",
+    "AI-Engineer/LangChain/Vector-Stores.md",
+    "AI-Engineer/LangChain/Text-Splitters.md",
+    "AI-Engineer/LangChain/Structured-Output.md",
+    "AI-Engineer/LangChain/Runnables.md",
+    "AI-Engineer/LangChain/Retrievers.md",
+    "AI-Engineer/LangChain/RAG.md",
+    "AI-Engineer/LangChain/Models.md",
+    "AI-Engineer/LangChain/Document-Loaders.md",
     "Reinforcement Learning/Tic-Tac-Toe.md",
     "Navigation/Reinforcement-Learning-Navigation.md",
     "Navigation/Python-Navigation.md",
-    "Navigation/NLP-Navigation.md",
-    "Navigation/MLOps-Navigation.md",
-    "Navigation/Machine-Learning-Navigation.md",
-    "Navigation/Home.md",
-    "Navigation/Deep-Learning-Navigation.md",
-    "Navigation/Data-Navigation.md",
-    "Navigation/AWS-Navigation.md",
-    "Navigation/AI-Engineer-Navigation.md",
-    "Reinforcement Learning/Exploration vs Exploitation.md",
-    "NLP/Intro to NLP.md",
-    "Deep Learning/CheatSheet-PyTorch.md",
-    "NLP/Text Representation.md",
-    "NLP/Text Pre-processing.md",
-    "NLP/NLP Pipeline.md",
     "Attachments/NLP - imdb review dataset.png",
     "Attachments/NLP - bag of words example.png",
     "Attachments/NLP - ohe D1.png",
     "Attachments/NLP - ohe vocabulary.png",
-    "Deep Learning/Making a Transformer from Scratch with PyTorch.md",
-    "Python/Async programming.md",
-    "MLOps/Docker.md",
     "Untitled 1",
-    "Python/Cheat-Sheet-Python-Code.md",
-    "Machine Learning/Pandas.md",
-    "Machine Learning/Numpy.md",
     "Attachments/Docker - working.png",
     "Attachments/Numpy - linspace.png",
     "Attachments/Numpy - fancy indexing rows.png",
@@ -219,17 +230,10 @@
     "Attachments/Numpy - slice extract 1.png",
     "Attachments/Numpy - index arr -1.png",
     "NLP",
-    "DataBase/SQL.md",
-    "Data-Engineering/ApacheSpark/ApacheSpark.md",
-    "DataBase/Mongodb.md",
     "Data-Engineering",
     "Data-Engineering/ApacheSpark",
     "DataBase",
     "AI-Engineer/LangChain/attachments",
-    "AI-Engineer/LangChain",
-    "Machine Learning/Cheat-Sheet/sedEJUiDT",
-    "Machine Learning/Cheat-Sheet",
-    "Machine Learning/Theory",
     "Untitled.canvas"
   ]
 }
