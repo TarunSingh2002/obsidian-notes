@@ -452,3 +452,71 @@ print(result['topic'], '->', result['joke'])   # samosa -> a joke about samosa
 - `thread_id` = separates different runs/conversations in the same database.
 - `invoke(None, ...)` = "continue / replay", not "start fresh".
 - `InMemorySaver` = RAM only, for demos. Use a database checkpointer (SQLite/Postgres/Redis) in real projects.
+
+## Code 2 : persistence in practice- Example 2
+
+```python
+from langchain_groq import ChatGroq
+from typing import TypedDict, Annotated, Literal
+from langgraph.graph.message import add_messages
+from langgraph.graph import StateGraph, START, END
+from langgraph.checkpoint.memory import InMemorySaver
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.messages import BaseMessage, AIMessage, HumanMessage, SystemMessage
+
+
+model = ChatGroq(
+    model="qwen/qwen3.8-27b",
+    api_key=key,
+    max_tokens=900,  # free tier: 1000 output tokens/min; default asks for 2048
+)
+
+class ChatState(TypedDict):
+    messages: Annotated[list[BaseMessage], add_messages]
+    humen_message : str
+
+def get_human_message(state: ChatState):
+    human_input = input('Put END to end')
+    return { 'humen_message': human_input }
+
+def is_chat_ends(state: ChatState) -> Literal[ 'save_user_text_in_history', '__end__']:
+    if state['humen_message']=='END':
+        return END
+    else:
+        return 'save_user_text_in_history'
+
+def save_user_text_in_history(state: ChatState):
+    return { 'messages': [HumanMessage(state['humen_message'])] }
+
+def talk_to_bot(state: ChatState):
+    ai_message=model.invoke(state['messages'])
+    print(ai_message)
+    print(type(ai_message))
+    print("="*50)
+    return { 'messages':[ai_message] }
+
+graph = StateGraph(ChatState)
+
+graph.add_node('get_human_message', get_human_message)
+graph.add_node('save_user_text_in_history', save_user_text_in_history)
+graph.add_node('talk_to_bot', talk_to_bot)
+
+graph.add_edge(START, 'get_human_message')
+graph.add_conditional_edges('get_human_message', is_chat_ends)
+graph.add_edge('save_user_text_in_history', 'talk_to_bot')
+graph.add_edge('talk_to_bot', 'get_human_message')
+
+checkpointer=InMemorySaver()
+chatbot = graph.compile(checkpointer=checkpointer)
+```
+
+now running it
+```python 
+# for person a
+config1 = {"configurable": {"thread_id": "id1"}}
+result = chatbot.invoke(config=config1)
+
+# for person b
+config1 = {"configurable": {"thread_id": "id2"}}
+result = chatbot.invoke(config=config1)
+```

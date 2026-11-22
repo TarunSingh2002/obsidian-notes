@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "7441831e111ff4b8",
+        "id": "9bb8c6840bbbec97",
         "type": "tabs",
         "children": [
           {
-            "id": "56f1b4fe2ebd4e3e",
+            "id": "cfdbfe7775e38cf6",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "AI-Engineer/LangGraph/Streaming.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Streaming"
+              "title": "New tab"
             }
           }
         ]
@@ -80,8 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 324.5,
-    "collapsed": true
+    "width": 324.5
   },
   "right": {
     "id": "eeaa25e87f210d6a",
@@ -116,12 +111,11 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Machine Learning/ML_Workflow_Decision_Guide.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from ML_Workflow_Decision_Guide"
+              "title": "Outgoing links"
             }
           },
           {
@@ -173,8 +167,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -187,13 +180,16 @@
       "bases:Create new base": false
     }
   },
-  "active": "56f1b4fe2ebd4e3e",
+  "active": "cfdbfe7775e38cf6",
   "lastOpenFiles": [
-    "AI-Engineer/LangGraph/WorkFlows.md",
+    "Python/UUID.md",
+    "AI-Engineer/LangGraph/Database Checkpointer.md",
     "AI-Engineer/LangGraph/Persistence.md",
-    "Python/Python yield & Generators.md",
-    "Python/Cheat-Sheet-Python-Code.md",
+    "AI-Engineer/LangGraph/LangSmith.md",
     "AI-Engineer/LangGraph/Streaming.md",
+    "Python/Python yield & Generators.md",
+    "AI-Engineer/LangGraph/WorkFlows.md",
+    "Python/Cheat-Sheet-Python-Code.md",
     "Python/Logger.md",
     "Python/Async programming.md",
     "AI-Engineer/LangGraph/Agentic AI Basics.md",
@@ -216,9 +212,6 @@
     "AI-Engineer/LangChain/Structured-Output.md",
     "AI-Engineer/LangChain/Runnables.md",
     "AI-Engineer/LangChain/Retrievers.md",
-    "AI-Engineer/LangChain/RAG.md",
-    "AI-Engineer/LangChain/Models.md",
-    "AI-Engineer/LangChain/Document-Loaders.md",
     "Attachments/NLP - imdb review dataset.png",
     "Attachments/NLP - bag of words example.png",
     "Attachments/NLP - ohe D1.png",
